@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "CollectionViewCell.h"
 #import "JXBAdPageView.h"
+#import "LF_PinTuViewController.h"
 @interface ViewController ()
 
 @end
@@ -19,7 +20,7 @@
 {
     [super viewDidLoad];
     
-    float width = (self.view.frame.size.width -10 -10 -10 -10)/3.0f - 1;
+    float width = (kDeviceWidth -10 -10 -10 -10)/3.0f - 1;
     
     UICollectionViewFlowLayout * flowLayout=[[UICollectionViewFlowLayout alloc] init];
     flowLayout.itemSize = CGSizeMake(width, width);
@@ -29,21 +30,22 @@
     flowLayout.minimumInteritemSpacing = 10.0f;
     flowLayout.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10);
     
-    float height = width*3+40;
-    mb_collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height-height, self.view.frame.size.width, height) collectionViewLayout:flowLayout];
+    mb_collectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, kDeviceWidth, KDeviceHeight) collectionViewLayout:flowLayout];
     [mb_collectionView registerClass:[CollectionViewCell class] forCellWithReuseIdentifier:@"CollectionViewCell"];
     mb_collectionView.backgroundColor = [UIColor whiteColor];
     mb_collectionView.delegate = self;
     mb_collectionView.dataSource = self;
+    [mb_collectionView setContentInset:UIEdgeInsetsMake(200, 0, 0, 0)];
     [self.view addSubview:mb_collectionView];
     
-    mb_adView = [[JXBAdPageView alloc] initWithFrame:CGRectMake(0, 20, [UIScreen mainScreen].bounds.size.width, self.view.frame.size.height- height -20-20)];
+    mb_adView = [[JXBAdPageView alloc] initWithFrame:CGRectMake(0, -200, kDeviceWidth, 200)];
     mb_adView.iDisplayTime = 2;
     mb_adView.bWebImage = NO;
-    [mb_adView startAdsWithBlock:@[@"1.png",@"2.png",@"3.png",@"4.png",@"5.png",@"6.png",@"7.png",@"8.png"] block:^(NSInteger clickIndex){
+    [mb_adView startAdsWithBlock:@[@"TaiKong_7.jpg",@"TaiKong_10.jpg",@"TaiKong_15.jpg"] block:^(NSInteger clickIndex){
     }];
-    [self.view addSubview:mb_adView];
+    [mb_collectionView addSubview:mb_adView];
 
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -54,21 +56,21 @@
 }
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 9;
+    return 18;
 }
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"CollectionViewCell" forIndexPath:indexPath];
-    NSString *imageName = [NSString stringWithFormat:@"Main_%ld.jpeg",(long)indexPath.row];
+    NSString *imageName = [NSString stringWithFormat:@"TaiKong_%ld.jpg",(long)indexPath.row];
     cell.mb_imageView.image = [UIImage imageNamed:imageName];
     return cell;
 }
--(BOOL)shouldAutorotate
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    return NO;
-}
--(NSUInteger)supportedInterfaceOrientations
-{
-    return UIInterfaceOrientationMaskPortrait;
+    NSString *imageName = [NSString stringWithFormat:@"TaiKong_%ld",(long)indexPath.row];
+    
+    LF_PinTuViewController *pintu = [[LF_PinTuViewController alloc] init];
+    pintu.pintuName = imageName;
+    [self presentViewController:pintu animated:YES completion:nil];
 }
 @end

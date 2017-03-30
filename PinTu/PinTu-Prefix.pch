@@ -13,4 +13,11 @@
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
+    #import "UMMobClick/MobClick.h"
+    #import "PinTuConst.h"
+    #import "Masonry.h"
+    #import "WWMBaseTool.h"
+    #import "YQBaseViewController.h"
+    #import "Dialog.h"
+    #import "YQHttpTool.h"
 #endif
