@@ -17,6 +17,7 @@
 }
 @property(nonatomic,assign)UISwipeGestureRecognizerDirection direction;
 @property(nonatomic,assign)id<ImageViewDelegate>delegate;
+@property(nonatomic,assign)CGPoint lastCenter;
 -(void)setLabelName:(NSString *)name;
 -(void)setImage:(NSString *)imageName;
 @end

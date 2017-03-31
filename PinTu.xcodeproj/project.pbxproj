@@ -9,11 +9,6 @@
 /* Begin PBXBuildFile section */
 		343F3E701E8CF21000BDC9E1 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E6F1E8CF21000BDC9E1 /* Launch Screen.storyboard */; };
 		343F3E721E8CF29600BDC9E1 /* launch.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E711E8CF29600BDC9E1 /* launch.jpg */; };
-		343F3E7A1E8CFBB200BDC9E1 /* CHANGELOG in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E751E8CFBB200BDC9E1 /* CHANGELOG */; };
-		343F3E7B1E8CFBB200BDC9E1 /* InMobiSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343F3E761E8CFBB200BDC9E1 /* InMobiSDK.framework */; };
-		343F3E7C1E8CFBB200BDC9E1 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E771E8CFBB200BDC9E1 /* LICENSE */; };
-		343F3E7D1E8CFBB200BDC9E1 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E781E8CFBB200BDC9E1 /* README */; };
-		343F3E7E1E8CFBB200BDC9E1 /* THIRD-PARTY-LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E791E8CFBB200BDC9E1 /* THIRD-PARTY-LICENSE */; };
 		343F3FC31E8CFCD400BDC9E1 /* TaiKong_0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E801E8CFCD400BDC9E1 /* TaiKong_0.jpg */; };
 		343F3FC41E8CFCD400BDC9E1 /* TaiKong_0_0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E811E8CFCD400BDC9E1 /* TaiKong_0_0.jpg */; };
 		343F3FC51E8CFCD400BDC9E1 /* TaiKong_0_1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E821E8CFCD400BDC9E1 /* TaiKong_0_1.jpg */; };
@@ -369,11 +364,6 @@
 		0A60D589BA7A7E0F8C014588 /* libPods-PinTu.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PinTu.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		343F3E6F1E8CF21000BDC9E1 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		343F3E711E8CF29600BDC9E1 /* launch.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = launch.jpg; sourceTree = "<group>"; };
-		343F3E751E8CFBB200BDC9E1 /* CHANGELOG */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CHANGELOG; sourceTree = "<group>"; };
-		343F3E761E8CFBB200BDC9E1 /* InMobiSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = InMobiSDK.framework; sourceTree = "<group>"; };
-		343F3E771E8CFBB200BDC9E1 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		343F3E781E8CFBB200BDC9E1 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		343F3E791E8CFBB200BDC9E1 /* THIRD-PARTY-LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "THIRD-PARTY-LICENSE"; sourceTree = "<group>"; };
 		343F3E801E8CFCD400BDC9E1 /* TaiKong_0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0.jpg; sourceTree = "<group>"; };
 		343F3E811E8CFCD400BDC9E1 /* TaiKong_0_0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0_0.jpg; sourceTree = "<group>"; };
 		343F3E821E8CFCD400BDC9E1 /* TaiKong_0_1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0_1.jpg; sourceTree = "<group>"; };
@@ -742,7 +732,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */,
-				343F3E7B1E8CFBB200BDC9E1 /* InMobiSDK.framework in Frameworks */,
 				34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */,
 				34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */,
 				3CC6330A1232E8D4A6C6A4BC /* libPods-PinTu.a in Frameworks */,
@@ -766,21 +755,8 @@
 			isa = PBXGroup;
 			children = (
 				343F412C1E8D05DE00BDC9E1 /* JXBAdPageView */,
-				343F3E741E8CFBB200BDC9E1 /* InMobi */,
 			);
 			path = Tools;
-			sourceTree = "<group>";
-		};
-		343F3E741E8CFBB200BDC9E1 /* InMobi */ = {
-			isa = PBXGroup;
-			children = (
-				343F3E751E8CFBB200BDC9E1 /* CHANGELOG */,
-				343F3E761E8CFBB200BDC9E1 /* InMobiSDK.framework */,
-				343F3E771E8CFBB200BDC9E1 /* LICENSE */,
-				343F3E781E8CFBB200BDC9E1 /* README */,
-				343F3E791E8CFBB200BDC9E1 /* THIRD-PARTY-LICENSE */,
-			);
-			path = InMobi;
 			sourceTree = "<group>";
 		};
 		343F3E7F1E8CFCD400BDC9E1 /* TaiKong_0 */ = {
@@ -1709,7 +1685,6 @@
 				343F40581E8CFCD400BDC9E1 /* TaiKong_8_6.jpg in Resources */,
 				343F40B21E8CFCD400BDC9E1 /* TaiKong_14_0.jpg in Resources */,
 				343F40A81E8CFCD400BDC9E1 /* TaiKong_13_15.jpg in Resources */,
-				343F3E7E1E8CFBB200BDC9E1 /* THIRD-PARTY-LICENSE in Resources */,
 				343F40291E8CFCD400BDC9E1 /* TaiKong_6.jpg in Resources */,
 				343F40D31E8CFCD400BDC9E1 /* TaiKong_16.jpg in Resources */,
 				343F40DE1E8CFCD400BDC9E1 /* TaiKong_16_4.jpg in Resources */,
@@ -1745,13 +1720,11 @@
 				343F40961E8CFCD400BDC9E1 /* TaiKong_12_14.jpg in Resources */,
 				343F40EC1E8CFCD400BDC9E1 /* TaiKong_17_15.jpg in Resources */,
 				343F400F1E8CFCD400BDC9E1 /* TaiKong_4_15.jpg in Resources */,
-				343F3E7D1E8CFBB200BDC9E1 /* README in Resources */,
 				343F3FE21E8CFCD400BDC9E1 /* TaiKong_1_7.jpg in Resources */,
 				343F40F21E8CFCD500BDC9E1 /* TaiKong_17_7.jpg in Resources */,
 				343F406D1E8CFCD400BDC9E1 /* TaiKong_10.jpg in Resources */,
 				343F408D1E8CFCD400BDC9E1 /* TaiKong_11_8.jpg in Resources */,
 				343F3FE91E8CFCD400BDC9E1 /* TaiKong_2_11.jpg in Resources */,
-				343F3E7C1E8CFBB200BDC9E1 /* LICENSE in Resources */,
 				343F40901E8CFCD400BDC9E1 /* TaiKong_12_0.jpg in Resources */,
 				343F40721E8CFCD400BDC9E1 /* TaiKong_10_12.jpg in Resources */,
 				343F40631E8CFCD400BDC9E1 /* TaiKong_9_14.jpg in Resources */,
@@ -1828,7 +1801,6 @@
 				343F3FEE1E8CFCD400BDC9E1 /* TaiKong_2_2.jpg in Resources */,
 				343F405C1E8CFCD400BDC9E1 /* TaiKong_9.jpg in Resources */,
 				343F405E1E8CFCD400BDC9E1 /* TaiKong_9_1.jpg in Resources */,
-				343F3E7A1E8CFBB200BDC9E1 /* CHANGELOG in Resources */,
 				343F40571E8CFCD400BDC9E1 /* TaiKong_8_5.jpg in Resources */,
 				343F40A91E8CFCD400BDC9E1 /* TaiKong_13_2.jpg in Resources */,
 				343F401F1E8CFCD400BDC9E1 /* TaiKong_5_14.jpg in Resources */,
@@ -2072,6 +2044,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/PinTu/Tools/InMobi",
+					"$(PROJECT_DIR)/PinTu/Tools/AdmobSDK",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";
@@ -2093,6 +2066,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/PinTu/Tools/InMobi",
+					"$(PROJECT_DIR)/PinTu/Tools/AdmobSDK",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";

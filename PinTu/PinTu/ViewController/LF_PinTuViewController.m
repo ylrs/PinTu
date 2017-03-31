@@ -8,8 +8,9 @@
 
 #import "LF_PinTuViewController.h"
 #import "PinTuView.h"
-@interface LF_PinTuViewController ()
-@property(nonatomic,strong)IMBanner *banner;
+@interface LF_PinTuViewController ()<GADBannerViewDelegate>
+@property(nonatomic, strong) GADBannerView *bannerView;
+
 @end
 
 @implementation LF_PinTuViewController
@@ -21,21 +22,24 @@
     
     [self initPinTuView];
     
-    [self initIMBanner];
+    [self initAdmobBanner];
     
     [self.view bringSubviewToFront:self.navigationBar];
     // Do any additional setup after loading the view.
 }
--(void)initIMBanner
+-(void)initAdmobBanner
 {
-    self.banner = [[IMBanner alloc] initWithFrame:CGRectMake(0, 64, kDeviceWidth, KDeviceHeight) placementId:INMOBI_BANNERID_1];
+    self.bannerView = [[GADBannerView alloc] initWithFrame:CGRectMake(0, 64, kDeviceWidth, 30+80)];
+    self.bannerView.adUnitID = ADMOB_BANNERID_1;
+    self.bannerView.rootViewController = self;
+    self.bannerView.delegate = self;
+    [self.view addSubview:self.bannerView];
     
-    //Optional: set a delegate to be notified if the banner is loaded/failed etc.
-    self.banner.delegate = self;
+    GADRequest *request = [GADRequest request];
     
-    [self.view addSubview:self.banner];
-    
-    [self.banner load];
+    request.testDevices = @[@"ba90d1c1619ac242a05828dd2ee46fce"];
+
+    [self.bannerView loadRequest:request];
 }
 -(void)initBackImage
 {
@@ -68,14 +72,6 @@
     pintuView.pintuName = self.pintuName;
     pintuView.backgroundColor = backColor;
     [self.view addSubview:pintuView];
-    
-    [YQHttpTool get:@"http://118.89.227.29:8080/HttpServlet/loginMethod" params:nil success:^(id responseObj) {
-        
-        NSLog(@"responseObj:%@",responseObj);
-        
-    } failure:^(NSError *error) {
-        
-    }];
 }
 -(void)viewWillAppear:(BOOL)animated
 {
@@ -89,6 +85,12 @@
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
 
 }
+-(void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+
+}
 -(void)backAction{
     
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -97,58 +99,13 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
--(void)bannerDidFinishLoading:(IMBanner*)banner {
-    NSLog(@"InMobi Banner finished loading");
+-(void)adViewDidReceiveAd:(GADBannerView *)bannerView
+{
+    self.bannerView.hidden = NO;
 }
-/**
- * Notifies the delegate that the banner has failed to load with some error.
- */
--(void)banner:(IMBanner*)banner didFailToLoadWithError:(IMRequestStatus*)error {
-    NSLog(@"InMobi Banner failed to load with error %@", error);
+- (void)adView:(GADBannerView *)adView didFailToReceiveAdWithError:(GADRequestError *)error {
+    NSLog(@"adVi0ew:didFailToReceiveAdWithError: %@", error.localizedDescription);
 }
-/**
- * Notifies the delegate that the banner was interacted with.
- */
--(void)banner:(IMBanner*)banner didInteractWithParams:(NSDictionary*)params {
-    NSLog(@"InMobi Banner did interact with params : %@", params);
-}
-/**
- * Notifies the delegate that the user would be taken out of the application context.
- */
--(void)userWillLeaveApplicationFromBanner:(IMBanner*)banner {
-    NSLog(@"User will leave application from InMobi Banner");
-}
-/**
- * Notifies the delegate that the banner would be presenting a full screen content.
- */
--(void)bannerWillPresentScreen:(IMBanner*)banner {
-    NSLog(@"InMobi Banner will present a screen");
-}
-/**
- * Notifies the delegate that the banner has finished presenting screen.
- */
--(void)bannerDidPresentScreen:(IMBanner*)banner {
-    NSLog(@"InMobi Banner finished presenting a screen");
-}
-/**
- * Notifies the delegate that the banner will start dismissing the presented screen.
- */
--(void)bannerWillDismissScreen:(IMBanner*)banner {
-    NSLog(@"InMobi Banner will dismiss a presented screen");
-}
-/**
- * Notifies the delegate that the banner has dismissed the presented screen.
- */
--(void)bannerDidDismissScreen:(IMBanner*)banner {
-    NSLog(@"InMobi Banner dismissed a presented screen");
-}
-/**
- * Notifies the delegate that the user has completed the action to be incentivised with.
- */
--(void)banner:(IMBanner*)banner rewardActionCompletedWithRewards:(NSDictionary*)rewards {
-    NSLog(@"InMobi Banner rewarded action completed. Rewards : %@", rewards);
-}
-
 /*
 #pragma mark - Navigation
 

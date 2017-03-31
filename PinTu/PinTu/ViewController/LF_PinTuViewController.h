@@ -8,7 +8,7 @@
 
 #import "YQBaseViewController.h"
 
-@interface LF_PinTuViewController : YQBaseViewController<IMBannerDelegate>
+@interface LF_PinTuViewController : YQBaseViewController
 
 @property(nonatomic,strong)NSString *pintuName;
 

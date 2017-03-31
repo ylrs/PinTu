@@ -8,5 +8,6 @@ target ‘PinTu’ do
   pod 'UMengAnalytics-NO-IDFA'
   pod 'RegExCategories', '~> 1.0'
   pod 'AFNetworking'
-  
+  pod 'Firebase/Core'
+  pod 'Firebase/AdMob'
 end

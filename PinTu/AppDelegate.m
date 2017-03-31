@@ -7,29 +7,25 @@
 //
 
 #import "AppDelegate.h"
-@import InMobiSDK.IMSdk;
+
+#import <GoogleMobileAds/GoogleMobileAds.h>
 #define AppStore            @"https://itunes.apple.com/us/app/pintu-puzzle/id1153946930?l=zh&ls=1&mt=8"
 
-//#define INMOBI_ACCOUNT_ID   @"4028cb8b2c3a0b45012c406824e800ba"
-
-#define INMOBI_ACCOUNT_ID   @"5b42424a6fcc4e94adc0c1e75151ad95"
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     
-    [self registerIMSDK];
+    [self registerAdMobSDK];
     
     [self registerUmeng];
     
     // Override point for customization after application launch.
     return YES;
 }
--(void)registerIMSDK
+-(void)registerAdMobSDK
 {
-    [IMSdk initWithAccountID:INMOBI_ACCOUNT_ID];
-    
-    [IMSdk setLogLevel:kIMSDKLogLevelDebug];
+    [GADMobileAds configureWithApplicationID:ADMOB_ACCOUNT_ID];
 }
 
 #pragma mark - 友盟统计

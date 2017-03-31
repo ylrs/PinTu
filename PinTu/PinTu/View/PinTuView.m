@@ -68,15 +68,10 @@
         [imageFrames addObject:NSStringFromCGRect(frame)];
     }
     
-    for (int j = 0; j < self.imageArrays.count; j++) {
-        int random = arc4random()%self.imageArrays.count;
-        ImageViewOne *image1 = self.imageArrays[j];
-        ImageViewOne *image2 = self.imageArrays[random];
-        CGRect temFrame = image1.frame;
-        image1.frame = image2.frame;
-        image2.frame = temFrame;
-
-    }
+    self.image16.frame = CGRectMake(3*imageWidth, 3*imageWidth, imageWidth, imageWidth);
+    
+    //打乱顺序
+    [self fixAction:HardLevel2];
     
     UILabel *lineX1 = [[UILabel alloc] init];
     lineX1.frame = CGRectMake(self.frame.size.width/4*1, 0, 1, self.frame.size.height);
@@ -158,5 +153,72 @@
     }
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"恭喜" message:@"成功拼图" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
     [alert show];
+}
+//打乱操作
+-(void)fixAction:(NSInteger)level
+{
+   __block CGPoint lastCenter = self.image16.center;
+    
+    NSMutableArray *fixImageArrays = [NSMutableArray arrayWithObjects:self.image1,self.image2,self.image3,self.image4,self.image5,self.image6,self.image7,self.image8,self.image9,self.image10,self.image11,self.image12,self.image13,self.image14,self.image15, nil];
+    
+    for (int i = 0; i < fixImageArrays.count; i++) {
+        int random = arc4random()%fixImageArrays.count;
+        ImageViewOne *image = fixImageArrays[random];
+        [fixImageArrays removeObject:image];
+        [fixImageArrays insertObject:image atIndex:0];
+    }
+
+    NSInteger tempDirection = 1;
+
+    //打乱逻辑，通过打乱次数来划分难度等级
+    for (int i = 0; i < level; i++) {
+        
+        for (int j = 0; j < fixImageArrays.count;j++) {
+            
+            ImageViewOne *imageOne = [fixImageArrays objectAtIndex:j];
+            
+            CGPoint imageCenter = imageOne.center;
+            
+            NSInteger direction = 0;//
+            
+            BOOL isCanReplace = NO;
+            
+            if (((imageCenter.x + imageWidth == lastCenter.x)&&(imageCenter.y == lastCenter.y))) {
+                isCanReplace = YES;
+                direction = 1;//向右
+            }
+            else if (((imageCenter.x - imageWidth == lastCenter.x)&&(imageCenter.y == lastCenter.y))){
+                isCanReplace = YES;
+                direction = 2;//向左
+            }
+            else if (((imageCenter.y - imageWidth == lastCenter.y)&&(imageCenter.x == lastCenter.x))){
+                isCanReplace = YES;
+                direction = 3;//向下
+            }
+            else if (((imageCenter.y + imageWidth == lastCenter.y)&&(imageCenter.x == lastCenter.x))){
+                isCanReplace = YES;
+                direction = 4;//向上
+            }
+            else{
+                isCanReplace = NO;
+            }
+            
+            if (isCanReplace && (tempDirection != direction)) {
+                
+                if (imageOne.lastCenter.x != lastCenter.x && imageOne.lastCenter.y != lastCenter.y) {
+
+                    tempDirection = direction;
+                    
+                    imageOne.lastCenter = imageCenter;
+                    
+                    imageOne.center = lastCenter;
+                    
+                    lastCenter = imageCenter;
+                }
+            }
+        }
+    }
+    
+    self.image16.hidden = YES;
 }
 @end

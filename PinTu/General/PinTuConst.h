@@ -9,8 +9,8 @@
 #ifndef PinTuConst_h
 #define PinTuConst_h
 
-#define INMOBI_BANNERID_1         1434033226586
-
+#define ADMOB_ACCOUNT_ID   @"ca-app-pub-6997611675344488~1776136250"
+#define ADMOB_BANNERID_1   @"ca-app-pub-6997611675344488/4574873453"
 
 #define RGB(r, g, b) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
 

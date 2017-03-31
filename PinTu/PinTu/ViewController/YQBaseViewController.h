@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import "LF_NavigationBar.h"
-@import InMobiSDK.IMBanner;
-@import InMobiSDK.IMBannerDelegate;
 
 @interface YQBaseViewController : UIViewController
 

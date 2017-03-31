@@ -19,5 +19,6 @@
     #import "WWMBaseTool.h"
     #import "YQBaseViewController.h"
     #import "Dialog.h"
+    #import <GoogleMobileAds/GoogleMobileAds.h>
     #import "YQHttpTool.h"
 #endif

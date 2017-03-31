@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '7F84DE64B951B322BEB9783EA0ECC8AA'
+               BlueprintIdentifier = '4C4333C077240E3F6B0D59F54A819B72'
                BlueprintName = 'Pods-PinTu'
                ReferencedContainer = 'container:Pods.xcodeproj'
                BuildableName = 'libPods-PinTu.a'>
