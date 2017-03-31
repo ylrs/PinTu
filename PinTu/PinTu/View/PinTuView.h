@@ -9,12 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "ImageViewOne.h"
 
-#define HardLevel1      3
-#define HardLevel2      5
-#define HardLevel3      15
-#define HardLevel4      30
-#define HardLevel5      50
-
 @interface PinTuView : UIView<ImageViewDelegate>
 {
     float imageWidth;
@@ -38,6 +32,8 @@
 @property(nonatomic,strong)ImageViewOne *image16;
 @property(nonatomic,strong)NSArray *imageArrays;
 @property(nonatomic,strong)NSString *pintuName;
+@property(nonatomic,assign)NSInteger hardlevel;
+
 -(void)finish;
 
 -(void)fixAction:(NSInteger)level;

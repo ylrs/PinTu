@@ -12,4 +12,5 @@
 
 @property(nonatomic,strong)NSString *pintuName;
 
+@property(nonatomic,assign)NSInteger hardlevel;
 @end

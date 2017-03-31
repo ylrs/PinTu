@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		343F3E701E8CF21000BDC9E1 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E6F1E8CF21000BDC9E1 /* Launch Screen.storyboard */; };
-		343F3E721E8CF29600BDC9E1 /* launch.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E711E8CF29600BDC9E1 /* launch.jpg */; };
 		343F3FC31E8CFCD400BDC9E1 /* TaiKong_0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E801E8CFCD400BDC9E1 /* TaiKong_0.jpg */; };
 		343F3FC41E8CFCD400BDC9E1 /* TaiKong_0_0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E811E8CFCD400BDC9E1 /* TaiKong_0_0.jpg */; };
 		343F3FC51E8CFCD400BDC9E1 /* TaiKong_0_1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 343F3E821E8CFCD400BDC9E1 /* TaiKong_0_1.jpg */; };
@@ -347,6 +345,7 @@
 		34C339D01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
 		34C339D81B330B1B000A3F3C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 34C339D61B330B1B000A3F3C /* InfoPlist.strings */; };
 		34C339DA1B330B1B000A3F3C /* PinTuTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C339D91B330B1B000A3F3C /* PinTuTests.m */; };
+		34F11DBB1E8E548F00E1A261 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F11DBA1E8E548F00E1A261 /* Launch Screen.storyboard */; };
 		3CC6330A1232E8D4A6C6A4BC /* libPods-PinTu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A60D589BA7A7E0F8C014588 /* libPods-PinTu.a */; };
 /* End PBXBuildFile section */
 
@@ -362,8 +361,6 @@
 
 /* Begin PBXFileReference section */
 		0A60D589BA7A7E0F8C014588 /* libPods-PinTu.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PinTu.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		343F3E6F1E8CF21000BDC9E1 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
-		343F3E711E8CF29600BDC9E1 /* launch.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = launch.jpg; sourceTree = "<group>"; };
 		343F3E801E8CFCD400BDC9E1 /* TaiKong_0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0.jpg; sourceTree = "<group>"; };
 		343F3E811E8CFCD400BDC9E1 /* TaiKong_0_0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0_0.jpg; sourceTree = "<group>"; };
 		343F3E821E8CFCD400BDC9E1 /* TaiKong_0_1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TaiKong_0_1.jpg; sourceTree = "<group>"; };
@@ -722,6 +719,7 @@
 		34C339D51B330B1B000A3F3C /* PinTuTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PinTuTests-Info.plist"; sourceTree = "<group>"; };
 		34C339D71B330B1B000A3F3C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		34C339D91B330B1B000A3F3C /* PinTuTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PinTuTests.m; sourceTree = "<group>"; };
+		34F11DBA1E8E548F00E1A261 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		61260E0C355D28A2D3A10132 /* Pods-PinTu.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PinTu.release.xcconfig"; path = "Pods/Target Support Files/Pods-PinTu/Pods-PinTu.release.xcconfig"; sourceTree = "<group>"; };
 		D72E8617CBE181B0B7091A02 /* Pods-PinTu.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PinTu.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PinTu/Pods-PinTu.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1352,12 +1350,11 @@
 			children = (
 				34C339BD1B330B1B000A3F3C /* Main_iPhone.storyboard */,
 				34C339C01B330B1B000A3F3C /* Main_iPad.storyboard */,
-				343F3E711E8CF29600BDC9E1 /* launch.jpg */,
 				34C339B31B330B1B000A3F3C /* PinTu-Info.plist */,
 				34C339B41B330B1B000A3F3C /* InfoPlist.strings */,
 				34C339B71B330B1B000A3F3C /* main.m */,
 				34C339B91B330B1B000A3F3C /* PinTu-Prefix.pch */,
-				343F3E6F1E8CF21000BDC9E1 /* Launch Screen.storyboard */,
+				34F11DBA1E8E548F00E1A261 /* Launch Screen.storyboard */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1524,7 +1521,6 @@
 				343F40B71E8CFCD400BDC9E1 /* TaiKong_14_13.jpg in Resources */,
 				343F3FF11E8CFCD400BDC9E1 /* TaiKong_2_5.jpg in Resources */,
 				343F40991E8CFCD400BDC9E1 /* TaiKong_12_3.jpg in Resources */,
-				343F3E721E8CF29600BDC9E1 /* launch.jpg in Resources */,
 				343F40621E8CFCD400BDC9E1 /* TaiKong_9_13.jpg in Resources */,
 				343F40BC1E8CFCD400BDC9E1 /* TaiKong_14_4.jpg in Resources */,
 				343F40881E8CFCD400BDC9E1 /* TaiKong_11_3.jpg in Resources */,
@@ -1666,7 +1662,6 @@
 				343F40811E8CFCD400BDC9E1 /* TaiKong_11_10.jpg in Resources */,
 				343F406B1E8CFCD400BDC9E1 /* TaiKong_9_8.jpg in Resources */,
 				343F40651E8CFCD400BDC9E1 /* TaiKong_9_2.jpg in Resources */,
-				343F3E701E8CF21000BDC9E1 /* Launch Screen.storyboard in Resources */,
 				343F40DF1E8CFCD400BDC9E1 /* TaiKong_16_5.jpg in Resources */,
 				343F40AF1E8CFCD400BDC9E1 /* TaiKong_13_8.jpg in Resources */,
 				343F40111E8CFCD400BDC9E1 /* TaiKong_4_3.jpg in Resources */,
@@ -1701,6 +1696,7 @@
 				343F402C1E8CFCD400BDC9E1 /* TaiKong_6_10.jpg in Resources */,
 				343F403A1E8CFCD400BDC9E1 /* TaiKong_7.jpg in Resources */,
 				343F40021E8CFCD400BDC9E1 /* TaiKong_3_5.jpg in Resources */,
+				34F11DBB1E8E548F00E1A261 /* Launch Screen.storyboard in Resources */,
 				343F40551E8CFCD400BDC9E1 /* TaiKong_8_3.jpg in Resources */,
 				343F40601E8CFCD400BDC9E1 /* TaiKong_9_11.jpg in Resources */,
 				343F40941E8CFCD400BDC9E1 /* TaiKong_12_12.jpg in Resources */,

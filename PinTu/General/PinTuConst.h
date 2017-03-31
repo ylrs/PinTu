@@ -9,6 +9,12 @@
 #ifndef PinTuConst_h
 #define PinTuConst_h
 
+#define HardLevel1      3
+#define HardLevel2      5
+#define HardLevel3      15
+#define HardLevel4      30
+#define HardLevel5      50
+
 #define ADMOB_ACCOUNT_ID   @"ca-app-pub-6997611675344488~1776136250"
 #define ADMOB_BANNERID_1   @"ca-app-pub-6997611675344488/4574873453"
 

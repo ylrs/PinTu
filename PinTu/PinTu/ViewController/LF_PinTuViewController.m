@@ -69,6 +69,7 @@
     UIColor *backColor = [WWMBaseTool getRandomColor];
     
     PinTuView *pintuView = [[PinTuView alloc] initWithFrame:CGRectMake(space, (KDeviceHeight-pintuW)/2+64, pintuW, pintuW)];
+    pintuView.hardlevel = self.hardlevel;
     pintuView.pintuName = self.pintuName;
     pintuView.backgroundColor = backColor;
     [self.view addSubview:pintuView];

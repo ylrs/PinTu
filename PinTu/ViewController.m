@@ -10,7 +10,7 @@
 #import "CollectionViewCell.h"
 #import "JXBAdPageView.h"
 #import "LF_PinTuViewController.h"
-@interface ViewController ()
+@interface ViewController ()<UIActionSheetDelegate>
 
 @end
 
@@ -67,10 +67,35 @@
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *imageName = [NSString stringWithFormat:@"TaiKong_%ld",(long)indexPath.row];
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"选择难度" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"简单",@"普通",@"困难",@"地狱", nil];
+    actionSheet.tag = indexPath.row;
+    [actionSheet showInView:self.view];
+}
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    NSInteger hardlevel = 1;
+    if (buttonIndex == 0) {
+        hardlevel = HardLevel1;
+    }
+    else if (buttonIndex == 1){
+        hardlevel = HardLevel2;
+    }
+    else if (buttonIndex == 2){
+        hardlevel = HardLevel3;
+    }
+    else if (buttonIndex == 3){
+        hardlevel = HardLevel4;
+    }
+    else if (buttonIndex == 4){
+        return;
+    }
     
+    NSString *imageName = [NSString stringWithFormat:@"TaiKong_%ld",(long)actionSheet.tag];
+
     LF_PinTuViewController *pintu = [[LF_PinTuViewController alloc] init];
     pintu.pintuName = imageName;
+    pintu.hardlevel = hardlevel;
     [self presentViewController:pintu animated:YES completion:nil];
+
 }
 @end

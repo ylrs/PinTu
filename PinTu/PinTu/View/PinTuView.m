@@ -71,7 +71,7 @@
     self.image16.frame = CGRectMake(3*imageWidth, 3*imageWidth, imageWidth, imageWidth);
     
     //打乱顺序
-    [self fixAction:HardLevel2];
+    [self fixAction:self.hardlevel];
     
     UILabel *lineX1 = [[UILabel alloc] init];
     lineX1.frame = CGRectMake(self.frame.size.width/4*1, 0, 1, self.frame.size.height);
