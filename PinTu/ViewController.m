@@ -89,7 +89,6 @@
     interstitial.delegate = self;
     GADRequest *request = [GADRequest request];
     // Requests test ads on test devices.
-    request.testDevices = @[@"ba90d1c1619ac242a05828dd2ee46fce"];
     [interstitial loadRequest:request];
     return interstitial;
 }
