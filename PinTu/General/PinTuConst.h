@@ -15,8 +15,10 @@
 #define HardLevel4      30
 #define HardLevel5      50
 
+#define ShadowSocksURL     @"https://www.potvpn.com/tutorial/trial_port"
 #define ADMOB_ACCOUNT_ID   @"ca-app-pub-6997611675344488~1776136250"
-#define ADMOB_BANNERID_1   @"ca-app-pub-6997611675344488/4574873453"
+#define ADMOB_BANNERID_1   @"ca-app-pub-6997611675344488/4163927457"
+#define ADMOB_BANNERID_2   @"ca-app-pub-6997611675344488/4574873453"
 
 #define RGB(r, g, b) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
 

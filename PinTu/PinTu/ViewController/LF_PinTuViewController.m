@@ -25,20 +25,19 @@
     [self initAdmobBanner];
     
     [self.view bringSubviewToFront:self.navigationBar];
+    
+    [self setTitleViewText:@"广告点击后消除"];
     // Do any additional setup after loading the view.
 }
 -(void)initAdmobBanner
 {
     self.bannerView = [[GADBannerView alloc] initWithFrame:CGRectMake(0, 64, kDeviceWidth, 30+80)];
-    self.bannerView.adUnitID = ADMOB_BANNERID_1;
+    self.bannerView.adUnitID = ADMOB_BANNERID_2;
     self.bannerView.rootViewController = self;
     self.bannerView.delegate = self;
     [self.view addSubview:self.bannerView];
     
     GADRequest *request = [GADRequest request];
-    
-    request.testDevices = @[@"ba90d1c1619ac242a05828dd2ee46fce"];
-
     [self.bannerView loadRequest:request];
 }
 -(void)initBackImage
@@ -84,13 +83,10 @@
 {
     [super viewWillDisappear:animated];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
-
 }
 -(void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    
-
 }
 -(void)backAction{
     
@@ -107,6 +103,11 @@
 - (void)adView:(GADBannerView *)adView didFailToReceiveAdWithError:(GADRequestError *)error {
     NSLog(@"adVi0ew:didFailToReceiveAdWithError: %@", error.localizedDescription);
 }
+- (void)adViewWillPresentScreen:(GADBannerView *)adView
+{
+    self.bannerView.hidden = YES;
+}
+
 /*
 #pragma mark - Navigation
 

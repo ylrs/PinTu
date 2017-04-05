@@ -345,6 +345,7 @@
 		34C339D01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
 		34C339D81B330B1B000A3F3C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 34C339D61B330B1B000A3F3C /* InfoPlist.strings */; };
 		34C339DA1B330B1B000A3F3C /* PinTuTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C339D91B330B1B000A3F3C /* PinTuTests.m */; };
+		34C3551D1E8FEC2F0085ED9F /* YQPublicWebviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C3551C1E8FEC2F0085ED9F /* YQPublicWebviewController.m */; };
 		34F11DBB1E8E548F00E1A261 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 34F11DBA1E8E548F00E1A261 /* Launch Screen.storyboard */; };
 		3CC6330A1232E8D4A6C6A4BC /* libPods-PinTu.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A60D589BA7A7E0F8C014588 /* libPods-PinTu.a */; };
 /* End PBXBuildFile section */
@@ -719,6 +720,8 @@
 		34C339D51B330B1B000A3F3C /* PinTuTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PinTuTests-Info.plist"; sourceTree = "<group>"; };
 		34C339D71B330B1B000A3F3C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		34C339D91B330B1B000A3F3C /* PinTuTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PinTuTests.m; sourceTree = "<group>"; };
+		34C3551B1E8FEC2F0085ED9F /* YQPublicWebviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YQPublicWebviewController.h; sourceTree = "<group>"; };
+		34C3551C1E8FEC2F0085ED9F /* YQPublicWebviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YQPublicWebviewController.m; sourceTree = "<group>"; };
 		34F11DBA1E8E548F00E1A261 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		61260E0C355D28A2D3A10132 /* Pods-PinTu.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PinTu.release.xcconfig"; path = "Pods/Target Support Files/Pods-PinTu/Pods-PinTu.release.xcconfig"; sourceTree = "<group>"; };
 		D72E8617CBE181B0B7091A02 /* Pods-PinTu.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PinTu.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PinTu/Pods-PinTu.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1228,6 +1231,8 @@
 		343F41011E8CFFF200BDC9E1 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				34C3551B1E8FEC2F0085ED9F /* YQPublicWebviewController.h */,
+				34C3551C1E8FEC2F0085ED9F /* YQPublicWebviewController.m */,
 				343F41091E8D024E00BDC9E1 /* YQBaseViewController.h */,
 				343F410A1E8D024E00BDC9E1 /* YQBaseViewController.m */,
 				343F41301E8D0A1E00BDC9E1 /* LF_PinTuViewController.h */,
@@ -1887,6 +1892,7 @@
 				343F410B1E8D024E00BDC9E1 /* YQBaseViewController.m in Sources */,
 				343F411F1E8D03B800BDC9E1 /* SVProgressHUD.m in Sources */,
 				343F412F1E8D05DE00BDC9E1 /* JXBAdPageView.m in Sources */,
+				34C3551D1E8FEC2F0085ED9F /* YQPublicWebviewController.m in Sources */,
 				34C339BC1B330B1B000A3F3C /* AppDelegate.m in Sources */,
 				343F41041E8CFFF200BDC9E1 /* LF_NavigationBar.m in Sources */,
 				343F410E1E8D02E700BDC9E1 /* CollectionViewCell.m in Sources */,

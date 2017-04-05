@@ -10,7 +10,10 @@
 #import "CollectionViewCell.h"
 #import "JXBAdPageView.h"
 #import "LF_PinTuViewController.h"
-@interface ViewController ()<UIActionSheetDelegate>
+#import "YQPublicWebviewController.h"
+@interface ViewController ()<UIActionSheetDelegate,GADInterstitialDelegate>
+@property(nonatomic,strong)UILabel *titleLabel;
+@property(nonatomic, strong) GADInterstitial *interstitial;
 
 @end
 
@@ -47,8 +50,59 @@
 
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:YES];
 	// Do any additional setup after loading the view, typically from a nib.
+    
+    self.titleLabel = [[UILabel alloc] init];
+    self.titleLabel.frame = CGRectMake( 0, 0, kDeviceWidth, 200);
+    self.titleLabel.text = @"免费ShadowSocks账号\n点击广告后展示";
+    self.titleLabel.backgroundColor = [UIColor clearColor];
+    self.titleLabel.textColor = [UIColor whiteColor];
+    self.titleLabel.numberOfLines = 0;
+    self.titleLabel.textAlignment = NSTextAlignmentCenter;
+    self.titleLabel.font = [UIFont systemFontOfSize:25];
+    self.titleLabel.userInteractionEnabled = YES;
+    [mb_adView addSubview:self.titleLabel];
+    
+    WS(ws);
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithActionBlock:^(id  _Nonnull sender) {
+        [ws addAdView];
+    }];
+    [self.titleLabel addGestureRecognizer:tapGesture];
+    
+    self.interstitial = [self createAndLoadInterstitial];
+
+}
+-(void)addAdView
+{
+    if ([self.interstitial isReady]) {
+        [self.interstitial presentFromRootViewController:self];
+    }
+    else{
+        YQPublicWebviewController * controller = [[YQPublicWebviewController alloc] init];
+        controller.urlstring = ShadowSocksURL;
+        
+        [self presentViewController:controller animated:YES completion:nil];
+    }
+}
+- (GADInterstitial *)createAndLoadInterstitial {
+    GADInterstitial *interstitial =
+    [[GADInterstitial alloc] initWithAdUnitID:ADMOB_BANNERID_1];
+    interstitial.delegate = self;
+    GADRequest *request = [GADRequest request];
+    // Requests test ads on test devices.
+    request.testDevices = @[@"ba90d1c1619ac242a05828dd2ee46fce"];
+    [interstitial loadRequest:request];
+    return interstitial;
 }
 
+- (void)interstitialDidDismissScreen:(GADInterstitial *)interstitial {
+    self.interstitial = [self createAndLoadInterstitial];
+    
+    YQPublicWebviewController * controller = [[YQPublicWebviewController alloc] init];
+    controller.urlstring = ShadowSocksURL;
+    
+    [self presentViewController:controller animated:YES completion:nil];
+
+}
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
