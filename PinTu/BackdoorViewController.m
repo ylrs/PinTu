@@ -27,6 +27,9 @@
     table.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     self.tableView = table;
     [self.view addSubview:table];
+    
+    UIBarButtonItem *closeItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeTapped)];
+    self.navigationItem.rightBarButtonItem = closeItem;
 }
 
 #pragma mark - UITableViewDataSource
@@ -64,6 +67,11 @@
     if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
         [self.delegate backdoorViewController:self didSelectAction:BackdoorActionShowTileIndices];
     }
+}
+
+- (void)closeTapped
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
