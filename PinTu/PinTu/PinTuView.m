@@ -50,7 +50,6 @@
 -(void)initImagesWith:(float)width
 {
     for (int i = 0; i<self.imageArrays.count; i++) {
-        NSString *imageName = [NSString stringWithFormat:@"1_%d.png",i];
         int index_X = i%4;
         int index_Y = i/4;
         ImageViewOne *image = self.imageArrays[i];
@@ -59,7 +58,6 @@
         image.frame = frame;
         image.tag = i;
         [self addSubview:image];
-        [image setImage:imageName];
         [imageFrames addObject:NSStringFromCGRect(frame)];
     }
     
@@ -103,6 +101,56 @@
     lineY3.frame = CGRectMake(0, self.frame.size.height/4*3, self.frame.size.width, 1);
     lineY3.backgroundColor = [UIColor grayColor];
     [self addSubview:lineY3];
+}
+
+- (void)configureWithImage:(UIImage *)sourceImage
+{
+    if (!sourceImage) {
+        return;
+    }
+    NSArray *tileImages = [self tileImagesFromSource:sourceImage];
+    if (tileImages.count != self.imageArrays.count) {
+        return;
+    }
+    for (NSInteger index = 0; index < self.imageArrays.count; index++) {
+        ImageViewOne *tileView = self.imageArrays[index];
+        UIImage *tileImage = tileImages[index];
+        [tileView setTileImage:tileImage];
+    }
+}
+
+- (NSArray *)tileImagesFromSource:(UIImage *)sourceImage
+{
+    CGImageRef cgImage = sourceImage.CGImage;
+    if (!cgImage) {
+        return @[];
+    }
+    size_t pixelWidth = CGImageGetWidth(cgImage);
+    size_t pixelHeight = CGImageGetHeight(cgImage);
+    size_t minSide = MIN(pixelWidth, pixelHeight);
+    if (minSide == 0) {
+        return @[];
+    }
+    CGRect squareRect = CGRectMake((pixelWidth - minSide)/2.0f, (pixelHeight - minSide)/2.0f, minSide, minSide);
+    CGFloat tileSide = minSide / 4.0f;
+    NSMutableArray *tiles = [NSMutableArray arrayWithCapacity:self.imageArrays.count];
+    for (NSInteger index = 0; index < self.imageArrays.count; index++) {
+        NSInteger col = index % 4;
+        NSInteger row = index / 4;
+        CGRect tileRect = CGRectMake(squareRect.origin.x + col * tileSide,
+                                     squareRect.origin.y + row * tileSide,
+                                     tileSide,
+                                     tileSide);
+        CGImageRef tileRef = CGImageCreateWithImageInRect(cgImage, tileRect);
+        if (tileRef) {
+            UIImage *tileImage = [UIImage imageWithCGImage:tileRef scale:sourceImage.scale orientation:sourceImage.imageOrientation];
+            [tiles addObject:tileImage];
+            CGImageRelease(tileRef);
+        } else {
+            [tiles addObject:[[UIImage alloc] init]];
+        }
+    }
+    return tiles;
 }
 -(void)getDirection:(UISwipeGestureRecognizerDirection)direction Tag:(NSInteger)tag
 {

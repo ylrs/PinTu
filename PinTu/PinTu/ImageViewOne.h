@@ -18,5 +18,5 @@
 @property(nonatomic,assign)UISwipeGestureRecognizerDirection direction;
 @property(nonatomic,assign)id<ImageViewDelegate>delegate;
 -(void)setLabelName:(NSString *)name;
--(void)setImage:(NSString *)imageName;
+- (void)setTileImage:(UIImage *)image;
 @end

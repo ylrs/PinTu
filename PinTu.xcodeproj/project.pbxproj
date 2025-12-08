@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		342CEC5F2EE6B608009271F7 /* PuzzleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */; };
 		34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AB1B330B1B000A3F3C /* Foundation.framework */; };
 		34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */; };
 		34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
@@ -72,6 +73,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		342CEC5D2EE6B608009271F7 /* PuzzleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PuzzleViewController.h; sourceTree = "<group>"; };
+		342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PuzzleViewController.m; sourceTree = "<group>"; };
 		34C339A81B330B1B000A3F3C /* PinTu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PinTu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34C339AB1B330B1B000A3F3C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -192,6 +195,8 @@
 		34C339B11B330B1B000A3F3C /* PinTu */ = {
 			isa = PBXGroup;
 			children = (
+				342CEC5D2EE6B608009271F7 /* PuzzleViewController.h */,
+				342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */,
 				34C33A2D1B331B6B000A3F3C /* JXBAdPageView */,
 				34C33A0E1B33142F000A3F3C /* MainImage */,
 				34C339E31B330B8D000A3F3C /* 1 */,
@@ -354,7 +359,7 @@
 				ORGANIZATIONNAME = YLRS;
 				TargetAttributes = {
 					34C339A71B330B1B000A3F3C = {
-						DevelopmentTeam = W3392PZWEX;
+						DevelopmentTeam = 454NH8NLV4;
 					};
 					34C339CB1B330B1B000A3F3C = {
 						TestTargetID = 34C339A71B330B1B000A3F3C;
@@ -366,6 +371,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -442,6 +448,7 @@
 			files = (
 				34C33A0D1B330E1E000A3F3C /* CollectionViewCell.m in Sources */,
 				34C339C51B330B1B000A3F3C /* ViewController.m in Sources */,
+				342CEC5F2EE6B608009271F7 /* PuzzleViewController.m in Sources */,
 				34C33A091B330B8D000A3F3C /* ImageViewOne.m in Sources */,
 				34C33A0A1B330B8D000A3F3C /* PinTuView.m in Sources */,
 				34C339BC1B330B1B000A3F3C /* AppDelegate.m in Sources */,
@@ -583,10 +590,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				DEVELOPMENT_TEAM = W3392PZWEX;
+				DEVELOPMENT_TEAM = 454NH8NLV4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";
 				INFOPLIST_FILE = "PinTu/PinTu-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -597,10 +605,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				DEVELOPMENT_TEAM = W3392PZWEX;
+				DEVELOPMENT_TEAM = 454NH8NLV4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";
 				INFOPLIST_FILE = "PinTu/PinTu-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

@@ -31,4 +31,5 @@
 @property(nonatomic,strong)ImageViewOne *image16;
 @property(nonatomic,strong)NSArray *imageArrays;
 -(void)finish;
+- (void)configureWithImage:(UIImage *)sourceImage;
 @end

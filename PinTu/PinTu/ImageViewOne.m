@@ -50,9 +50,9 @@
     imageLabel.frame = CGRectMake((self.frame.size.width-100)/2, (self.frame.size.height-50)/2, 100, 50);
     imageLabel.text = name;
 }
--(void)setImage:(NSString *)imageName
+- (void)setTileImage:(UIImage *)image
 {
     imageView.frame = self.bounds;
-    imageView.image = [UIImage imageNamed:imageName];
+    imageView.image = image;
 }
 @end
