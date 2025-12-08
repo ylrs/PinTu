@@ -12,6 +12,7 @@
 {
     float imageWidth;
     NSMutableArray *imageFrames;
+    BOOL _shouldShowIndices;
 }
 @property(nonatomic,strong)ImageViewOne *image1;
 @property(nonatomic,strong)ImageViewOne *image2;
@@ -32,4 +33,5 @@
 @property(nonatomic,strong)NSArray *imageArrays;
 -(void)finish;
 - (void)configureWithImage:(UIImage *)sourceImage;
+- (void)showIndexOverlay:(BOOL)show;
 @end

@@ -8,8 +8,9 @@
 #import "PuzzleViewController.h"
 #import "PinTu/PinTuView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "BackdoorViewController.h"
 
-@interface PuzzleViewController ()
+@interface PuzzleViewController ()<BackdoorViewControllerDelegate>
 @property (nonatomic, strong) UIImage *sourceImage;
 @property (nonatomic, strong) UIImageView *backgroundImageView;
 @property (nonatomic, strong) UIVisualEffectView *blurView;
@@ -17,6 +18,7 @@
 @property (nonatomic, strong) PinTuView *puzzleView;
 @property (nonatomic, strong) UIButton *backButton;
 @property (nonatomic, strong) UIImageView *referenceImageView;
+@property (nonatomic, assign) BOOL hasRevealedIndices;
 @end
 
 @implementation PuzzleViewController
@@ -81,6 +83,9 @@
     referenceView.layer.shadowOpacity = 0.25f;
     referenceView.layer.shadowRadius = 6.0f;
     referenceView.layer.shadowOffset = CGSizeZero;
+    referenceView.userInteractionEnabled = YES;
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(referenceTapped)];
+    [referenceView addGestureRecognizer:tap];
     [self.view addSubview:referenceView];
     self.referenceImageView = referenceView;
 }
@@ -174,6 +179,23 @@
     return YES;
 }
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
+}
+
+- (void)referenceTapped
+{
+    BackdoorViewController *controller = [[BackdoorViewController alloc] init];
+    controller.delegate = self;
+    controller.showTileIndices = self.hasRevealedIndices;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
+    nav.modalPresentationStyle = UIModalPresentationAutomatic;
+    nav.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+    [self presentViewController:nav animated:YES completion:nil];
+}
+
 - (void)applyGlowAnimationToLayer:(CALayer *)layer
 {
     if (!layer) {
@@ -195,6 +217,24 @@
 - (void)closePressed
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+#pragma mark - BackdoorViewControllerDelegate
+- (void)backdoorViewController:(BackdoorViewController *)controller didSelectAction:(BackdoorAction)action
+{
+    __weak typeof(self) weakSelf = self;
+    BOOL shouldShow = controller.showTileIndices;
+    [controller dismissViewControllerAnimated:YES completion:^{
+        if (action == BackdoorActionShowTileIndices) {
+            [weakSelf toggleTileIndices:shouldShow];
+        }
+    }];
+}
+
+- (void)toggleTileIndices:(BOOL)show
+{
+    self.hasRevealedIndices = show;
+    [self.puzzleView showIndexOverlay:show];
 }
 
 @end

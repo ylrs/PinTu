@@ -260,6 +260,7 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
         }
     }
     [[NSUserDefaults standardUserDefaults] setObject:fileNames forKey:kUserAddedImageFilenamesKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 -(NSString *)userImagesDirectory
 {

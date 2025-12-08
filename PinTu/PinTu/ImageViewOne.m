@@ -13,13 +13,17 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        imageLabel = [[UILabel alloc] init];
-        imageLabel.backgroundColor = [UIColor redColor];
-        imageLabel.font = [UIFont systemFontOfSize:30];
-        imageLabel.textAlignment = NSTextAlignmentCenter;
-//        [self addSubview:imageLabel];
         imageView = [[UIImageView alloc] init];
         [self addSubview:imageView];
+        
+        imageLabel = [[UILabel alloc] init];
+        imageLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.55f];
+        imageLabel.font = [UIFont boldSystemFontOfSize:28];
+        imageLabel.textAlignment = NSTextAlignmentCenter;
+        imageLabel.textColor = [UIColor whiteColor];
+        imageLabel.hidden = YES;
+        imageLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [self addSubview:imageLabel];
         
         UISwipeGestureRecognizer *swipeGestureUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(recognizer:)];
         swipeGestureUp.direction = UISwipeGestureRecognizerDirectionUp;
@@ -47,12 +51,17 @@
 }
 -(void)setLabelName:(NSString *)name
 {
-    imageLabel.frame = CGRectMake((self.frame.size.width-100)/2, (self.frame.size.height-50)/2, 100, 50);
+    imageLabel.frame = self.bounds;
     imageLabel.text = name;
+}
+- (void)setLabelHidden:(BOOL)hidden
+{
+    imageLabel.hidden = hidden;
 }
 - (void)setTileImage:(UIImage *)image
 {
     imageView.frame = self.bounds;
+    imageLabel.frame = self.bounds;
     imageView.image = image;
 }
 @end

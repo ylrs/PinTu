@@ -14,6 +14,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
+        _shouldShowIndices = NO;
         imageWidth = frame.size.width/4;
         self.image1  = [[ImageViewOne alloc] init];
         self.image2  = [[ImageViewOne alloc] init];
@@ -58,6 +59,8 @@
         image.frame = frame;
         image.tag = i;
         [self addSubview:image];
+        [image setLabelName:[NSString stringWithFormat:@"%d",i+1]];
+        [image setLabelHidden:!_shouldShowIndices];
         [imageFrames addObject:NSStringFromCGRect(frame)];
     }
     
@@ -116,6 +119,7 @@
         ImageViewOne *tileView = self.imageArrays[index];
         UIImage *tileImage = tileImages[index];
         [tileView setTileImage:tileImage];
+        [tileView setLabelHidden:!_shouldShowIndices];
     }
 }
 
@@ -151,6 +155,15 @@
         }
     }
     return tiles;
+}
+-(void)showIndexOverlay:(BOOL)show
+{
+    _shouldShowIndices = show;
+    for (NSInteger index = 0; index < self.imageArrays.count; index++) {
+        ImageViewOne *tileView = self.imageArrays[index];
+        [tileView setLabelHidden:!show];
+        [tileView setLabelName:[NSString stringWithFormat:@"%ld", (long)index + 1]];
+    }
 }
 -(void)getDirection:(UISwipeGestureRecognizerDirection)direction Tag:(NSInteger)tag
 {

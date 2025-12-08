@@ -19,4 +19,5 @@
 @property(nonatomic,assign)id<ImageViewDelegate>delegate;
 -(void)setLabelName:(NSString *)name;
 - (void)setTileImage:(UIImage *)image;
+- (void)setLabelHidden:(BOOL)hidden;
 @end
