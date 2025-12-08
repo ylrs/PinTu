@@ -17,7 +17,7 @@
 @property (nonatomic,strong)UIImageView         *imgCurrent;
 @property (nonatomic,strong)UIImageView         *imgNext;
 @property (nonatomic,strong)NSTimer             *myTimer;
-@property (nonatomic,assign)JXBAdPageCallback   myBlock;
+@property (nonatomic,copy)JXBAdPageCallback     myBlock;
 @end
 
 @implementation JXBAdPageView
@@ -76,7 +76,7 @@
         _scView.contentSize = CGSizeMake(self.frame.size.width, self.frame.size.height);
     _pageControl.numberOfPages = imageArray.count;
     _arrImage = imageArray;
-    _myBlock = block;
+    _myBlock = [block copy];
     [self reloadImages];
 }
 

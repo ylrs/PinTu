@@ -17,18 +17,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="launch_screen" translatesAutoresizingMaskIntoConstraints="NO" id="VZT-oG-TcN">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" image="LaunchAppIcon" id="VZT-oG-TcN">
+                                <rect key="frame" x="147" y="308" width="120" height="120"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="vDu-zF-Fre"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstAttribute="top" secondItem="VZT-oG-TcN" secondAttribute="top" id="1m9-rK-1Hn"/>
-                            <constraint firstItem="VZT-oG-TcN" firstAttribute="leading" secondItem="vDu-zF-Fre" secondAttribute="leading" id="AdW-ZE-XcC"/>
-                            <constraint firstItem="VZT-oG-TcN" firstAttribute="top" secondItem="5EZ-qb-Rvc" secondAttribute="top" id="MaS-RE-xei"/>
-                            <constraint firstAttribute="bottom" secondItem="VZT-oG-TcN" secondAttribute="bottom" id="vTZ-5q-r6g"/>
-                            <constraint firstItem="vDu-zF-Fre" firstAttribute="trailing" secondItem="VZT-oG-TcN" secondAttribute="trailing" id="wGE-Zh-Iqw"/>
+                            <constraint firstItem="VZT-oG-TcN" firstAttribute="centerX" secondItem="vDu-zF-Fre" secondAttribute="centerX" id="1Vx-ya-KzQ"/>
+                            <constraint firstItem="VZT-oG-TcN" firstAttribute="centerY" secondItem="vDu-zF-Fre" secondAttribute="centerY" id="6u8-bq-3vE"/>
+                            <constraint firstItem="VZT-oG-TcN" firstAttribute="width" constant="120" id="MC6-28-ePo"/>
+                            <constraint firstItem="VZT-oG-TcN" firstAttribute="height" constant="120" id="hTI-dS-aac"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -38,9 +37,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="launch_screen" width="1242" height="2688"/>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
+        <image name="LaunchAppIcon" width="120" height="120"/>
     </resources>
 </document>
