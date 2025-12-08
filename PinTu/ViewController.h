@@ -9,9 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "JXBAdPageView.h"
 
-@interface ViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate>
+@interface ViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 {
     UICollectionView           *mb_collectionView;
     JXBAdPageView              *mb_adView;
+    NSMutableArray             *mb_puzzleItems;
 }
 @end
