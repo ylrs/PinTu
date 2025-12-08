@@ -191,7 +191,7 @@
     controller.delegate = self;
     controller.showTileIndices = self.hasRevealedIndices;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
-    nav.modalPresentationStyle = UIModalPresentationAutomatic;
+    nav.modalPresentationStyle = UIModalPresentationFullScreen;
     nav.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
     [self presentViewController:nav animated:YES completion:nil];
 }

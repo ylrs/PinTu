@@ -15,14 +15,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor colorWithWhite:0.12f alpha:1.0f];
+    self.view.backgroundColor = [UIColor whiteColor];
     self.title = @"后门功能";
     
     UITableView *table = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleInsetGrouped];
     table.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     table.dataSource = self;
     table.delegate = self;
-    table.backgroundColor = [UIColor clearColor];
+    table.backgroundColor = [UIColor whiteColor];
     table.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     table.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     self.tableView = table;
