@@ -10,7 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "BackdoorViewController.h"
 
-@interface PuzzleViewController ()<BackdoorViewControllerDelegate>
+@interface PuzzleViewController ()<BackdoorViewControllerDelegate, PinTuViewDelegate>
 @property (nonatomic, strong) UIImage *sourceImage;
 @property (nonatomic, strong) UIImageView *backgroundImageView;
 @property (nonatomic, strong) UIVisualEffectView *blurView;
@@ -19,6 +19,11 @@
 @property (nonatomic, strong) UIButton *backButton;
 @property (nonatomic, strong) UIImageView *referenceImageView;
 @property (nonatomic, assign) BOOL hasRevealedIndices;
+@property (nonatomic, strong) UIImage *activePuzzleImage;
+@property (nonatomic, strong) NSDate *puzzleStartDate;
+@property (nonatomic, assign) BOOL hasShownCompletionAlert;
+@property (nonatomic, strong) UILabel *timerLabel;
+@property (nonatomic, strong) NSTimer *timer;
 @end
 
 @implementation PuzzleViewController
@@ -28,6 +33,9 @@
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _sourceImage = image;
+        _activePuzzleImage = image;
+        _puzzleStartDate = [NSDate date];
+        _hasShownCompletionAlert = NO;
         self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
     return self;
@@ -72,6 +80,17 @@
     [backButton addTarget:self action:@selector(closePressed) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:backButton];
     self.backButton = backButton;
+    
+    UILabel *timerLabel = [[UILabel alloc] init];
+    timerLabel.textAlignment = NSTextAlignmentCenter;
+    timerLabel.font = [UIFont monospacedDigitSystemFontOfSize:26 weight:UIFontWeightBold];
+    timerLabel.textColor = [UIColor whiteColor];
+    timerLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.35f];
+    timerLabel.layer.cornerRadius = 18.0f;
+    timerLabel.layer.masksToBounds = YES;
+    timerLabel.text = @"00:00";
+    [self.view addSubview:timerLabel];
+    self.timerLabel = timerLabel;
     
     UIImageView *referenceView = [[UIImageView alloc] initWithImage:self.sourceImage];
     referenceView.contentMode = UIViewContentModeScaleAspectFill;
@@ -158,20 +177,40 @@
     if (!self.puzzleView) {
         PinTuView *puzzle = [[PinTuView alloc] initWithFrame:self.puzzleContainer.bounds];
         puzzle.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        puzzle.completionDelegate = self;
         [puzzle configureWithImage:self.sourceImage];
+        [puzzle showIndexOverlay:self.hasRevealedIndices];
         [self.puzzleContainer addSubview:puzzle];
         self.puzzleView = puzzle;
+        self.activePuzzleImage = self.sourceImage;
+        self.puzzleStartDate = [NSDate date];
+        self.hasShownCompletionAlert = NO;
+        [self startPuzzleTimerIfNeeded];
     } else if (!CGRectEqualToRect(self.puzzleView.frame, self.puzzleContainer.bounds)) {
         [self.puzzleView removeFromSuperview];
         PinTuView *puzzle = [[PinTuView alloc] initWithFrame:self.puzzleContainer.bounds];
         puzzle.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        puzzle.completionDelegate = self;
         [puzzle configureWithImage:self.sourceImage];
+        [puzzle showIndexOverlay:self.hasRevealedIndices];
         [self.puzzleContainer addSubview:puzzle];
         self.puzzleView = puzzle;
+        self.activePuzzleImage = self.sourceImage;
+        self.puzzleStartDate = [NSDate date];
+        self.hasShownCompletionAlert = NO;
+        [self startPuzzleTimerIfNeeded];
     }
+    self.puzzleView.completionDelegate = self;
+    [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
     
     [self.view bringSubviewToFront:self.backButton];
     [self.view bringSubviewToFront:self.referenceImageView];
+    CGSize timerSize = CGSizeMake(140.0f, 44.0f);
+    self.timerLabel.frame = CGRectMake((self.view.bounds.size.width - timerSize.width) / 2.0f,
+                                       safeInsets.top + 70.0f,
+                                       timerSize.width,
+                                       timerSize.height);
+    [self.view bringSubviewToFront:self.timerLabel];
 }
 
 - (BOOL)prefersStatusBarHidden
@@ -183,6 +222,7 @@
 {
     [super viewDidAppear:animated];
     [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
+    [self startPuzzleTimerIfNeeded];
 }
 
 - (void)referenceTapped
@@ -235,6 +275,73 @@
 {
     self.hasRevealedIndices = show;
     [self.puzzleView showIndexOverlay:show];
+}
+
+- (void)startPuzzleTimerIfNeeded
+{
+    if (!self.puzzleStartDate) {
+        self.puzzleStartDate = [NSDate date];
+    }
+    [self updateTimerLabel];
+    if (self.timer) {
+        [self.timer invalidate];
+    }
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                  target:self
+                                                selector:@selector(updateTimerLabel)
+                                                userInfo:nil
+                                                 repeats:YES];
+}
+
+- (void)stopPuzzleTimer
+{
+    if (self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
+}
+
+- (void)updateTimerLabel
+{
+    if (!self.puzzleStartDate) {
+        self.timerLabel.text = @"00:00";
+        return;
+    }
+    NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:self.puzzleStartDate];
+    NSInteger totalSeconds = (NSInteger)elapsed;
+    NSInteger minutes = totalSeconds / 60;
+    NSInteger seconds = totalSeconds % 60;
+    self.timerLabel.text = [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
+}
+
+- (void)dealloc
+{
+    [self.timer invalidate];
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self stopPuzzleTimer];
+}
+
+#pragma mark - PinTuViewDelegate
+- (void)pinTuViewDidComplete:(PinTuView *)puzzleView
+{
+    if (self.hasShownCompletionAlert) {
+        return;
+    }
+    self.hasShownCompletionAlert = YES;
+    [self stopPuzzleTimer];
+    NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:self.puzzleStartDate ?: [NSDate date]];
+    NSInteger totalSeconds = (NSInteger)round(elapsed);
+    NSInteger minutes = totalSeconds / 60;
+    NSInteger seconds = totalSeconds % 60;
+    NSString *message = [NSString stringWithFormat:@"耗时 %02ld:%02ld 完成拼图", (long)minutes, (long)seconds];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"恭喜" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 @end

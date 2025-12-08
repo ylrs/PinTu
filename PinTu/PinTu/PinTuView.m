@@ -15,6 +15,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         _shouldShowIndices = NO;
+        _hasCompleted = NO;
         imageWidth = frame.size.width/4;
         self.image1  = [[ImageViewOne alloc] init];
         self.image2  = [[ImageViewOne alloc] init];
@@ -50,6 +51,7 @@
 }
 -(void)initImagesWith:(float)width
 {
+    _hasCompleted = NO;
     for (int i = 0; i<self.imageArrays.count; i++) {
         int index_X = i%4;
         int index_Y = i/4;
@@ -111,6 +113,7 @@
     if (!sourceImage) {
         return;
     }
+    _hasCompleted = NO;
     NSArray *tileImages = [self tileImagesFromSource:sourceImage];
     if (tileImages.count != self.imageArrays.count) {
         return;
@@ -205,6 +208,9 @@
 
 -(void)checkComplete
 {
+    if (_hasCompleted) {
+        return;
+    }
     for (int i = 0; i < imageFrames.count; i++) {
         NSString *strFrame = imageFrames[i];
         ImageViewOne *image = self.imageArrays[i];
@@ -213,7 +219,11 @@
             return;
         }
     }
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"恭喜" message:@"成功拼图" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-    [alert show];
+    _hasCompleted = YES;
+    if (self.completionDelegate && [self.completionDelegate respondsToSelector:@selector(pinTuViewDidComplete:)]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.completionDelegate pinTuViewDidComplete:self];
+        });
+    }
 }
 @end

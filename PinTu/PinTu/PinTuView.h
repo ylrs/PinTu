@@ -8,11 +8,19 @@
 
 #import <UIKit/UIKit.h>
 #import "ImageViewOne.h"
+
+@class PinTuView;
+
+@protocol PinTuViewDelegate <NSObject>
+- (void)pinTuViewDidComplete:(PinTuView *)puzzleView;
+@end
+
 @interface PinTuView : UIView<ImageViewDelegate>
 {
     float imageWidth;
     NSMutableArray *imageFrames;
     BOOL _shouldShowIndices;
+    BOOL _hasCompleted;
 }
 @property(nonatomic,strong)ImageViewOne *image1;
 @property(nonatomic,strong)ImageViewOne *image2;
@@ -31,6 +39,7 @@
 @property(nonatomic,strong)ImageViewOne *image15;
 @property(nonatomic,strong)ImageViewOne *image16;
 @property(nonatomic,strong)NSArray *imageArrays;
+@property(nonatomic,weak)id<PinTuViewDelegate>completionDelegate;
 -(void)finish;
 - (void)configureWithImage:(UIImage *)sourceImage;
 - (void)showIndexOverlay:(BOOL)show;
