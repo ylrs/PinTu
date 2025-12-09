@@ -39,6 +39,7 @@ static inline NSInteger PTColForIndex(NSInteger index) {
     if (self) {
         _shouldShowIndices = NO;
         _hasCompleted = NO;
+        _shuffleDifficulty = PinTuShuffleDifficultyHard;
         imageWidth = frame.size.width/4.0f;
         self.image1  = [[ImageViewOne alloc] init];
         self.image2  = [[ImageViewOne alloc] init];
@@ -110,7 +111,6 @@ static inline NSInteger PTColForIndex(NSInteger index) {
     }
     
     [self resetBoardToSolvedConfiguration];
-    [self shuffleTiles];
     
     UILabel *lineX1 = [[UILabel alloc] init];
     lineX1.frame = CGRectMake(self.frame.size.width/4.0f, 0, 1, self.frame.size.height);
@@ -162,7 +162,6 @@ static inline NSInteger PTColForIndex(NSInteger index) {
         [tileView setTileImage:tileImage];
         [tileView setLabelHidden:!_shouldShowIndices];
     }
-    [self shuffleTiles];
 }
 
 - (NSArray *)tileImagesFromSource:(UIImage *)sourceImage
@@ -209,6 +208,38 @@ static inline NSInteger PTColForIndex(NSInteger index) {
     }
 }
 
+- (void)applyShuffleWithDifficulty:(PinTuShuffleDifficulty)difficulty
+{
+    self.shuffleDifficulty = difficulty;
+    [self shuffleTiles];
+}
+
++ (NSString *)displayNameForDifficulty:(PinTuShuffleDifficulty)difficulty
+{
+    switch (difficulty) {
+        case PinTuShuffleDifficultySimple:
+            return @"简单";
+        case PinTuShuffleDifficultyHard:
+            return @"困难";
+        case PinTuShuffleDifficultyHell:
+            return @"地狱";
+    }
+    return @"未知";
+}
+
+- (NSInteger)shuffleStepCountForCurrentDifficulty
+{
+    switch (self.shuffleDifficulty) {
+        case PinTuShuffleDifficultySimple:
+            return 60;
+        case PinTuShuffleDifficultyHard:
+            return 160;
+        case PinTuShuffleDifficultyHell:
+            return 320;
+    }
+    return 160;
+}
+
 - (void)shuffleTiles
 {
     if (self.imageArrays.count == 0 || imageFrames.count < 16) {
@@ -217,7 +248,7 @@ static inline NSInteger PTColForIndex(NSInteger index) {
     [autoSolveOrder removeAllObjects];
     [self resetBoardToSolvedConfiguration];
     
-    NSInteger shuffleSteps = 200;
+    NSInteger shuffleSteps = [self shuffleStepCountForCurrentDifficulty];
     NSInteger lastDirection = -1;
     static const NSInteger offsets[4] = { -4, 4, -1, 1 };
     static const NSInteger rowAdjust[4] = { -1, 1, 0, 0 };

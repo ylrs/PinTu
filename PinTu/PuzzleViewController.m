@@ -9,6 +9,7 @@
 #import "PinTu/PinTuView.h"
 #import <QuartzCore/QuartzCore.h>
 #import "BackdoorViewController.h"
+#import "CelebrationOverlayView.h"
 
 @interface PuzzleViewController ()<BackdoorViewControllerDelegate, PinTuViewDelegate>
 @property (nonatomic, strong) UIImage *sourceImage;
@@ -25,18 +26,25 @@
 @property (nonatomic, strong) UILabel *timerLabel;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) BOOL autoSolving;
+@property (nonatomic, assign) PinTuShuffleDifficulty currentDifficulty;
 @end
 
 @implementation PuzzleViewController
 
 - (instancetype)initWithImage:(UIImage *)image
 {
+    return [self initWithImage:image difficulty:PinTuShuffleDifficultyHard];
+}
+
+- (instancetype)initWithImage:(UIImage *)image difficulty:(PinTuShuffleDifficulty)difficulty
+{
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _sourceImage = image;
         _activePuzzleImage = image;
-        _puzzleStartDate = [NSDate date];
+        _puzzleStartDate = nil;
         _hasShownCompletionAlert = NO;
+        _currentDifficulty = difficulty;
         self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
     return self;
@@ -184,9 +192,8 @@
         [self.puzzleContainer addSubview:puzzle];
         self.puzzleView = puzzle;
         self.activePuzzleImage = self.sourceImage;
-        self.puzzleStartDate = [NSDate date];
         self.hasShownCompletionAlert = NO;
-        [self startPuzzleTimerIfNeeded];
+        [self applyDifficulty:self.currentDifficulty];
     } else if (!CGRectEqualToRect(self.puzzleView.frame, self.puzzleContainer.bounds)) {
         [self.puzzleView removeFromSuperview];
         PinTuView *puzzle = [[PinTuView alloc] initWithFrame:self.puzzleContainer.bounds];
@@ -197,9 +204,8 @@
         [self.puzzleContainer addSubview:puzzle];
         self.puzzleView = puzzle;
         self.activePuzzleImage = self.sourceImage;
-        self.puzzleStartDate = [NSDate date];
         self.hasShownCompletionAlert = NO;
-        [self startPuzzleTimerIfNeeded];
+        [self applyDifficulty:self.currentDifficulty];
     }
     self.puzzleView.completionDelegate = self;
     [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
@@ -231,6 +237,7 @@
     BackdoorViewController *controller = [[BackdoorViewController alloc] init];
     controller.delegate = self;
     controller.showTileIndices = self.hasRevealedIndices;
+    controller.selectedDifficulty = self.currentDifficulty;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
     nav.modalPresentationStyle = UIModalPresentationFullScreen;
     nav.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
@@ -268,6 +275,7 @@
 {
     __weak typeof(self) weakSelf = self;
     BOOL shouldShow = controller.showTileIndices;
+    PinTuShuffleDifficulty chosenDifficulty = controller.selectedDifficulty;
     [controller dismissViewControllerAnimated:YES completion:^{
         if (!weakSelf) {
             return;
@@ -276,8 +284,27 @@
             [weakSelf toggleTileIndices:shouldShow];
         } else if (action == BackdoorActionAutoSolve) {
             [weakSelf startAutoSolveSequence];
+        } else if (action == BackdoorActionChangeDifficulty) {
+            [weakSelf applyDifficulty:chosenDifficulty];
         }
     }];
+}
+
+- (void)applyDifficulty:(PinTuShuffleDifficulty)difficulty
+{
+    self.currentDifficulty = difficulty;
+    if (!self.puzzleView) {
+        return;
+    }
+    self.autoSolving = NO;
+    self.puzzleView.userInteractionEnabled = YES;
+    [self.puzzleView resetAutoSolveProgress];
+    [self stopPuzzleTimer];
+    self.puzzleStartDate = [NSDate date];
+    self.hasShownCompletionAlert = NO;
+    self.timerLabel.text = @"00:00";
+    [self.puzzleView applyShuffleWithDifficulty:difficulty];
+    [self startPuzzleTimerIfNeeded];
 }
 
 - (void)toggleTileIndices:(BOOL)show
@@ -391,12 +418,21 @@
     NSInteger totalSeconds = (NSInteger)round(elapsed);
     NSInteger minutes = totalSeconds / 60;
     NSInteger seconds = totalSeconds % 60;
-    NSString *message = [NSString stringWithFormat:@"耗时 %02ld:%02ld 完成拼图", (long)minutes, (long)seconds];
+    NSString *title = @"馨馨小宝贝，你太棒了！";
+    NSString *detail = [NSString stringWithFormat:@"用时 %02ld:%02ld 完成拼图，点亮完美徽章 ✨", (long)minutes, (long)seconds];
     self.timerLabel.text = [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"恭喜" message:message preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:nil]];
-    [self presentViewController:alert animated:YES completion:nil];
+    __weak typeof(self) weakSelf = self;
+    [CelebrationOverlayView presentInView:self.view
+                                  message:title
+                                   detail:detail
+                                  confirm:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        // Optional hook for future actions, currently no-op.
+    }];
 }
 
 @end

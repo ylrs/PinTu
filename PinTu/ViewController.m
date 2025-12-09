@@ -10,6 +10,8 @@
 #import "CollectionViewCell.h"
 #import "JXBAdPageView.h"
 #import "PuzzleViewController.h"
+#import "DifficultySelectionView.h"
+#import "PinTu/PinTuView.h"
 
 static NSString * const kUserAddedImageFilenamesKey = @"UserAddedImageFilenames";
 static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
@@ -115,9 +117,17 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     if (!sourceImage) {
         return;
     }
-    PuzzleViewController *controller = [[PuzzleViewController alloc] initWithImage:sourceImage];
-    controller.modalPresentationStyle = UIModalPresentationFullScreen;
-    [self presentViewController:controller animated:YES completion:nil];
+    __weak typeof(self) weakSelf = self;
+    UIImage *selectedImage = sourceImage;
+    [DifficultySelectionView presentInView:self.view
+                         defaultDifficulty:PinTuShuffleDifficultyHard
+                                 selection:^(PinTuShuffleDifficulty difficulty) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        [strongSelf presentPuzzleWithImage:selectedImage difficulty:difficulty];
+    } cancel:nil];
 }
 -(UIImage *)puzzleImageForIndex:(NSInteger)index
 {
@@ -126,6 +136,16 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     }
     id item = mb_puzzleItems[index];
     return [self imageForPuzzleItem:item];
+}
+
+- (void)presentPuzzleWithImage:(UIImage *)image difficulty:(PinTuShuffleDifficulty)difficulty
+{
+    if (!image) {
+        return;
+    }
+    PuzzleViewController *controller = [[PuzzleViewController alloc] initWithImage:image difficulty:difficulty];
+    controller.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:controller animated:YES completion:nil];
 }
 -(void)layoutHomeViews
 {

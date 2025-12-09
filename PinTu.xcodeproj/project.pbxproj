@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		342CEC5F2EE6B608009271F7 /* PuzzleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */; };
 		342CEC802EE6C219009271F7 /* BackdoorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC7F2EE6C219009271F7 /* BackdoorViewController.m */; };
+		342CEC872EE7D0CD009271F7 /* DifficultySelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC862EE7D0CD009271F7 /* DifficultySelectionView.m */; };
 		34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AB1B330B1B000A3F3C /* Foundation.framework */; };
 		34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */; };
 		34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
@@ -61,6 +62,7 @@
 		34C33A3E1B331D1C000A3F3C /* 6.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A361B331D1C000A3F3C /* 6.png */; };
 		34C33A3F1B331D1C000A3F3C /* 7.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A371B331D1C000A3F3C /* 7.png */; };
 		34C33A401B331D1C000A3F3C /* 8.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A381B331D1C000A3F3C /* 8.png */; };
+		342CEC8D2EEB8149009271F7 /* CelebrationOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +80,10 @@
 		342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PuzzleViewController.m; sourceTree = "<group>"; };
 		342CEC7E2EE6C219009271F7 /* BackdoorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BackdoorViewController.h; sourceTree = "<group>"; };
 		342CEC7F2EE6C219009271F7 /* BackdoorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BackdoorViewController.m; sourceTree = "<group>"; };
+		342CEC852EE7D0CD009271F7 /* DifficultySelectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DifficultySelectionView.h; sourceTree = "<group>"; };
+		342CEC862EE7D0CD009271F7 /* DifficultySelectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DifficultySelectionView.m; sourceTree = "<group>"; };
+		342CEC8B2EEB8149009271F7 /* CelebrationOverlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CelebrationOverlayView.h; sourceTree = "<group>"; };
+		342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CelebrationOverlayView.m; sourceTree = "<group>"; };
 		34C339A81B330B1B000A3F3C /* PinTu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PinTu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		34C339AB1B330B1B000A3F3C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -198,6 +204,10 @@
 		34C339B11B330B1B000A3F3C /* PinTu */ = {
 			isa = PBXGroup;
 			children = (
+				342CEC852EE7D0CD009271F7 /* DifficultySelectionView.h */,
+				342CEC862EE7D0CD009271F7 /* DifficultySelectionView.m */,
+				342CEC8B2EEB8149009271F7 /* CelebrationOverlayView.h */,
+				342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */,
 				342CEC7E2EE6C219009271F7 /* BackdoorViewController.h */,
 				342CEC7F2EE6C219009271F7 /* BackdoorViewController.m */,
 				342CEC5D2EE6B608009271F7 /* PuzzleViewController.h */,
@@ -451,6 +461,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				342CEC8D2EEB8149009271F7 /* CelebrationOverlayView.m in Sources */,
+				342CEC872EE7D0CD009271F7 /* DifficultySelectionView.m in Sources */,
 				34C33A0D1B330E1E000A3F3C /* CollectionViewCell.m in Sources */,
 				34C339C51B330B1B000A3F3C /* ViewController.m in Sources */,
 				342CEC5F2EE6B608009271F7 /* PuzzleViewController.m in Sources */,

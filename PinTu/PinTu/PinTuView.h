@@ -15,6 +15,12 @@
 - (void)pinTuViewDidComplete:(PinTuView *)puzzleView;
 @end
 
+typedef NS_ENUM(NSInteger, PinTuShuffleDifficulty) {
+    PinTuShuffleDifficultySimple = 0,
+    PinTuShuffleDifficultyHard,
+    PinTuShuffleDifficultyHell
+};
+
 @interface PinTuView : UIView<ImageViewDelegate>
 {
     float imageWidth;
@@ -43,10 +49,12 @@
 @property(nonatomic,strong)ImageViewOne *image16;
 @property(nonatomic,strong)NSArray *imageArrays;
 @property(nonatomic,weak)id<PinTuViewDelegate>completionDelegate;
+@property (nonatomic, assign) PinTuShuffleDifficulty shuffleDifficulty;
 -(void)finish;
 - (void)configureWithImage:(UIImage *)sourceImage;
 - (void)showIndexOverlay:(BOOL)show;
 - (void)resetAutoSolveProgress;
 - (void)performAutoSolveStepWithCompletion:(void (^)(BOOL hasMore))completion;
-- (void)shuffleTiles;
+- (void)applyShuffleWithDifficulty:(PinTuShuffleDifficulty)difficulty;
++ (NSString *)displayNameForDifficulty:(PinTuShuffleDifficulty)difficulty;
 @end

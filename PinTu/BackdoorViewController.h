@@ -6,10 +6,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PinTu/PinTuView.h"
 
 typedef NS_ENUM(NSInteger, BackdoorAction) {
     BackdoorActionShowTileIndices = 0,
     BackdoorActionAutoSolve = 1,
+    BackdoorActionChangeDifficulty = 2,
 };
 
 @class BackdoorViewController;
@@ -22,5 +24,6 @@ typedef NS_ENUM(NSInteger, BackdoorAction) {
 
 @property (nonatomic, weak) id<BackdoorViewControllerDelegate> delegate;
 @property (nonatomic, assign) BOOL showTileIndices;
+@property (nonatomic, assign) PinTuShuffleDifficulty selectedDifficulty;
 
 @end

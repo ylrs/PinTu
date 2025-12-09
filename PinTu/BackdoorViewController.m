@@ -38,7 +38,7 @@
     return 1;
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 2;
+    return 3;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == 0) {
@@ -55,6 +55,19 @@
         }
         cell.textLabel.text = @"显示拼图块编号";
         self.toggleSwitch.on = self.showTileIndices;
+        return cell;
+    } else if (indexPath.row == 1) {
+        static NSString *difficultyIdentifier = @"BackdoorDifficultyCell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:difficultyIdentifier];
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:difficultyIdentifier];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.font = [UIFont systemFontOfSize:16.0f weight:UIFontWeightMedium];
+            cell.detailTextLabel.font = [UIFont systemFontOfSize:15.0f];
+            cell.detailTextLabel.textColor = [UIColor colorWithRed:0.32f green:0.45f blue:0.86f alpha:1.0f];
+        }
+        cell.textLabel.text = @"打乱复杂度";
+        cell.detailTextLabel.text = [PinTuView displayNameForDifficulty:self.selectedDifficulty];
         return cell;
     } else {
         static NSString *buttonIdentifier = @"BackdoorButtonCell";
@@ -73,6 +86,9 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (indexPath.row == 1) {
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        [self presentDifficultyOptionsFromCell:cell];
+    } else if (indexPath.row == 2) {
         if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
             [self.delegate backdoorViewController:self didSelectAction:BackdoorActionAutoSolve];
         }
@@ -85,6 +101,45 @@
     if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
         [self.delegate backdoorViewController:self didSelectAction:BackdoorActionShowTileIndices];
     }
+}
+
+- (void)presentDifficultyOptionsFromCell:(UITableViewCell *)cell
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择难度"
+                                                                   message:nil
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
+    __weak typeof(self) weakSelf = self;
+    void (^addAction)(PinTuShuffleDifficulty) = ^(PinTuShuffleDifficulty difficulty) {
+        NSString *title = [PinTuView displayNameForDifficulty:difficulty];
+        UIAlertAction *action = [UIAlertAction actionWithTitle:title
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:^(UIAlertAction * _Nonnull _) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            strongSelf.selectedDifficulty = difficulty;
+            NSIndexPath *difficultyIndex = [NSIndexPath indexPathForRow:1 inSection:0];
+            [strongSelf.tableView reloadRowsAtIndexPaths:@[difficultyIndex] withRowAnimation:UITableViewRowAnimationNone];
+            if ([strongSelf.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
+                [strongSelf.delegate backdoorViewController:strongSelf didSelectAction:BackdoorActionChangeDifficulty];
+            }
+        }];
+        [alert addAction:action];
+    };
+    addAction(PinTuShuffleDifficultySimple);
+    addAction(PinTuShuffleDifficultyHard);
+    addAction(PinTuShuffleDifficultyHell);
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    [alert addAction:cancel];
+    
+    UIPopoverPresentationController *popover = alert.popoverPresentationController;
+    if (popover) {
+        popover.sourceView = cell ?: self.view;
+        popover.sourceRect = cell ? cell.bounds : self.view.bounds;
+    }
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)closeTapped
