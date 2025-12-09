@@ -7,6 +7,9 @@
 
 #import "HuaRongDaoViewController.h"
 #import "CelebrationOverlayView.h"
+#import <limits.h>
+#import <stdint.h>
+#import <stdlib.h>
 
 static const NSInteger kHRDRowCount = 5;
 static const NSInteger kHRDColumnCount = 4;
@@ -14,68 +17,89 @@ static const CGFloat kHRDDefaultBorderWidth = 4.0f;
 static const NSInteger kHRDDirectionCount = 4;
 static const NSInteger kHRDDirectionRows[4] = {-1, 1, 0, 0};
 static const NSInteger kHRDDirectionCols[4] = {0, 0, -1, 1};
+static const uint8_t kHRDPieceCount = 10;
+static const uint8_t kHRDPieceWidths[10] = {2, 1, 1, 1, 1, 2, 1, 1, 1, 1};
+static const uint8_t kHRDPieceHeights[10] = {2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
+static const uint8_t kHRDGoalValue = 3 * kHRDColumnCount + 1;
 
-static NSString *HRDStateKeyForCoords(const NSInteger *coords,
-                                      NSInteger pieceCount,
-                                      const NSInteger *widths,
-                                      const NSInteger *heights)
+typedef struct {
+    uint64_t state;
+    uint32_t parent;
+    int8_t pieceIndex;
+    int8_t dRow;
+    int8_t dCol;
+} HRDBFSNode;
+
+typedef struct {
+    uint64_t key;
+    uint32_t value;
+} HRDHashEntry;
+
+static inline uint64_t HRDEncodeState(const uint8_t *rows, const uint8_t *cols, uint8_t pieceCount)
 {
-    const NSInteger cellCount = kHRDRowCount * kHRDColumnCount;
-    char buffer[cellCount];
-    for (NSInteger idx = 0; idx < cellCount; idx++) {
-        buffer[idx] = '.';
+    uint64_t state = 0;
+    for (uint8_t idx = 0; idx < pieceCount; idx++) {
+        uint8_t value = (uint8_t)(rows[idx] * kHRDColumnCount + cols[idx]);
+        state |= ((uint64_t)(value & 0x1F)) << (idx * 5);
     }
-    for (NSInteger pieceIndex = 0; pieceIndex < pieceCount; pieceIndex++) {
-        NSInteger row = coords[pieceIndex * 2];
-        NSInteger col = coords[pieceIndex * 2 + 1];
-        NSInteger width = widths[pieceIndex];
-        NSInteger height = heights[pieceIndex];
-        for (NSInteger r = 0; r < height; r++) {
-            for (NSInteger c = 0; c < width; c++) {
-                NSInteger cellIndex = (row + r) * kHRDColumnCount + (col + c);
-                if (cellIndex >= 0 && cellIndex < cellCount) {
-                    buffer[cellIndex] = (char)('A' + pieceIndex);
-                }
-            }
-        }
-    }
-    return [[NSString alloc] initWithBytes:buffer
-                                    length:(NSUInteger)cellCount
-                                  encoding:NSASCIIStringEncoding];
+    return state;
 }
 
-static BOOL HRDCanMovePiece(const NSInteger *coords,
-                            NSInteger pieceIndex,
-                            NSInteger dRow,
-                            NSInteger dCol,
-                            NSInteger pieceCount,
-                            const NSInteger *widths,
-                            const NSInteger *heights)
+static inline uint8_t HRDEncodedRow(uint64_t state, uint8_t pieceIndex)
 {
-    NSInteger row = coords[pieceIndex * 2];
-    NSInteger col = coords[pieceIndex * 2 + 1];
-    NSInteger width = widths[pieceIndex];
-    NSInteger height = heights[pieceIndex];
-    NSInteger newRow = row + dRow;
-    NSInteger newCol = col + dCol;
+    uint8_t value = (uint8_t)((state >> (pieceIndex * 5)) & 0x1F);
+    return (uint8_t)(value / kHRDColumnCount);
+}
+
+static inline uint8_t HRDEncodedCol(uint64_t state, uint8_t pieceIndex)
+{
+    uint8_t value = (uint8_t)((state >> (pieceIndex * 5)) & 0x1F);
+    return (uint8_t)(value % kHRDColumnCount);
+}
+
+static inline uint64_t HRDSetEncodedPosition(uint64_t state, uint8_t pieceIndex, uint8_t row, uint8_t col)
+{
+    uint64_t mask = (uint64_t)0x1F << (pieceIndex * 5);
+    uint64_t value = (uint64_t)((row * kHRDColumnCount + col) & 0x1F) << (pieceIndex * 5);
+    return (state & ~mask) | value;
+}
+
+static inline BOOL HRDEncodedIsGoal(uint64_t state)
+{
+    return ((state & 0x1F) == kHRDGoalValue);
+}
+
+static inline BOOL HRDCanMoveInState(uint64_t state,
+                                     uint8_t pieceIndex,
+                                     int8_t dRow,
+                                     int8_t dCol)
+{
+    uint8_t row = HRDEncodedRow(state, pieceIndex);
+    uint8_t col = HRDEncodedCol(state, pieceIndex);
+    uint8_t width = kHRDPieceWidths[pieceIndex];
+    uint8_t height = kHRDPieceHeights[pieceIndex];
+    
+    int newRow = (int)row + dRow;
+    int newCol = (int)col + dCol;
     if (newRow < 0 || newCol < 0) {
         return NO;
     }
     if (newRow + height > kHRDRowCount || newCol + width > kHRDColumnCount) {
         return NO;
     }
-    NSInteger newBottom = newRow + height - 1;
-    NSInteger newRight = newCol + width - 1;
-    for (NSInteger idx = 0; idx < pieceCount; idx++) {
+    int newBottom = newRow + height - 1;
+    int newRight = newCol + width - 1;
+    
+    for (uint8_t idx = 0; idx < kHRDPieceCount; idx++) {
         if (idx == pieceIndex) {
             continue;
         }
-        NSInteger otherRow = coords[idx * 2];
-        NSInteger otherCol = coords[idx * 2 + 1];
-        NSInteger otherWidth = widths[idx];
-        NSInteger otherHeight = heights[idx];
-        NSInteger otherBottom = otherRow + otherHeight - 1;
-        NSInteger otherRight = otherCol + otherWidth - 1;
+        uint8_t otherRow = HRDEncodedRow(state, idx);
+        uint8_t otherCol = HRDEncodedCol(state, idx);
+        uint8_t otherWidth = kHRDPieceWidths[idx];
+        uint8_t otherHeight = kHRDPieceHeights[idx];
+        int otherBottom = otherRow + otherHeight - 1;
+        int otherRight = otherCol + otherWidth - 1;
         BOOL separatedVertically = (newRow > otherBottom) || (newBottom < otherRow);
         BOOL separatedHorizontally = (newCol > otherRight) || (newRight < otherCol);
         if (!(separatedVertically || separatedHorizontally)) {
@@ -85,9 +109,23 @@ static BOOL HRDCanMovePiece(const NSInteger *coords,
     return YES;
 }
 
-static BOOL HRDIsGoal(const NSInteger *coords)
+static inline uint32_t HRDHashInsert(HRDHashEntry *table,
+                                     uint32_t mask,
+                                     uint64_t key,
+                                     uint32_t value)
 {
-    return (coords[0] == 3 && coords[1] == 1);
+    uint32_t idx = (uint32_t)(key * 11400714819323198485ull) & mask;
+    while (true) {
+        if (table[idx].key == UINT64_MAX) {
+            table[idx].key = key;
+            table[idx].value = value;
+            return idx;
+        }
+        if (table[idx].key == key) {
+            return UINT32_MAX;
+        }
+        idx = (idx + 1) & mask;
+    }
 }
 
 typedef NS_ENUM(NSInteger, HRDPanAxis) {
@@ -819,101 +857,98 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
                                                       sizes:(NSArray<NSValue *> *)sizes
                                                       order:(NSArray<NSString *> *)order
 {
-    NSInteger pieceCount = order.count;
-    if (coords.count != pieceCount * 2 || sizes.count != pieceCount) {
-        return @[];
-    }
-    NSInteger widths[pieceCount];
-    NSInteger heights[pieceCount];
-    for (NSInteger idx = 0; idx < pieceCount; idx++) {
-        CGSize size = [sizes[idx] CGSizeValue];
-        widths[idx] = (NSInteger)lround(size.width);
-        heights[idx] = (NSInteger)lround(size.height);
-    }
-    
-    NSInteger initialCoords[pieceCount * 2];
-    for (NSInteger idx = 0; idx < pieceCount * 2; idx++) {
-        initialCoords[idx] = coords[idx].integerValue;
-    }
-    
-    if (HRDIsGoal(initialCoords)) {
+    (void)sizes;
+    if (order.count != kHRDPieceCount || coords.count != kHRDPieceCount * 2 || sizes.count != kHRDPieceCount) {
         return @[];
     }
     
-    NSString *initialKey = HRDStateKeyForCoords(initialCoords, pieceCount, widths, heights);
-    if (!initialKey) {
+    uint8_t rows[kHRDPieceCount];
+    uint8_t cols[kHRDPieceCount];
+    for (uint8_t idx = 0; idx < kHRDPieceCount; idx++) {
+        NSUInteger rowIndex = idx * 2;
+        rows[idx] = (uint8_t)coords[rowIndex].integerValue;
+        cols[idx] = (uint8_t)coords[rowIndex + 1].integerValue;
+    }
+    
+    if (rows[0] == 3 && cols[0] == 1) {
         return @[];
     }
     
-    NSMutableArray<NSArray<NSNumber *> *> *queue = [NSMutableArray array];
-    NSMutableArray<NSString *> *keys = [NSMutableArray array];
-    [queue addObject:[coords copy]];
-    [keys addObject:initialKey];
-    NSMutableSet<NSString *> *visited = [NSMutableSet setWithObject:initialKey];
-    NSMutableDictionary<NSString *, NSDictionary *> *parentMap = [NSMutableDictionary dictionary];
+    uint64_t initialState = HRDEncodeState(rows, cols, kHRDPieceCount);
+    NSMutableData *queueData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
+    HRDBFSNode root = {initialState, UINT32_MAX, -1, 0, 0};
+    [queueData appendBytes:&root length:sizeof(HRDBFSNode)];
     
-    NSUInteger head = 0;
-    while (head < queue.count) {
-        NSArray<NSNumber *> *state = queue[head];
-        NSString *stateKey = keys[head];
-        head++;
-        
-        NSInteger stateCoords[pieceCount * 2];
-        for (NSInteger idx = 0; idx < pieceCount * 2; idx++) {
-            stateCoords[idx] = state[idx].integerValue;
+    uint32_t queueCount = 1;
+    uint32_t head = 0;
+    uint32_t goalIndex = UINT32_MAX;
+    
+    uint32_t hashCapacity = 1u << 21;
+    uint32_t hashMask = hashCapacity - 1;
+    HRDHashEntry *hashTable = calloc(hashCapacity, sizeof(HRDHashEntry));
+    if (!hashTable) {
+        return @[];
+    }
+    for (uint32_t idx = 0; idx < hashCapacity; idx++) {
+        hashTable[idx].key = UINT64_MAX;
+    }
+    HRDHashInsert(hashTable, hashMask, initialState, 0);
+    
+    while (head < queueCount) {
+        HRDBFSNode *nodes = queueData.mutableBytes;
+        HRDBFSNode current = nodes[head];
+        if (HRDEncodedIsGoal(current.state)) {
+            goalIndex = head;
+            break;
         }
-        
-        if (HRDIsGoal(stateCoords)) {
-            NSMutableArray<NSDictionary *> *moves = [NSMutableArray array];
-            NSString *cursorKey = stateKey;
-            while (![cursorKey isEqualToString:initialKey]) {
-                NSDictionary *info = parentMap[cursorKey];
-                if (!info) {
-                    break;
-                }
-                NSDictionary *move = info[@"move"];
-                if (move) {
-                    [moves addObject:move];
-                }
-                cursorKey = info[@"parent"];
-            }
-            NSArray<NSDictionary *> *reversed = [[moves reverseObjectEnumerator] allObjects];
-            return reversed;
-        }
-        
-        for (NSInteger pieceIndex = 0; pieceIndex < pieceCount; pieceIndex++) {
+        for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
             for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
-                NSInteger dRow = kHRDDirectionRows[direction];
-                NSInteger dCol = kHRDDirectionCols[direction];
-                if (!HRDCanMovePiece(stateCoords, pieceIndex, dRow, dCol, pieceCount, widths, heights)) {
+                int8_t dRow = (int8_t)kHRDDirectionRows[direction];
+                int8_t dCol = (int8_t)kHRDDirectionCols[direction];
+                if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
                     continue;
                 }
-                NSInteger nextCoords[pieceCount * 2];
-                for (NSInteger idx = 0; idx < pieceCount * 2; idx++) {
-                    nextCoords[idx] = stateCoords[idx];
-                }
-                nextCoords[pieceIndex * 2] += dRow;
-                nextCoords[pieceIndex * 2 + 1] += dCol;
-                NSString *nextKey = HRDStateKeyForCoords(nextCoords, pieceCount, widths, heights);
-                if (!nextKey || [visited containsObject:nextKey]) {
+                uint8_t row = HRDEncodedRow(current.state, pieceIndex);
+                uint8_t col = HRDEncodedCol(current.state, pieceIndex);
+                uint64_t nextState = HRDSetEncodedPosition(current.state,
+                                                           pieceIndex,
+                                                           (uint8_t)(row + dRow),
+                                                           (uint8_t)(col + dCol));
+                uint32_t hashResult = HRDHashInsert(hashTable, hashMask, nextState, queueCount);
+                if (hashResult == UINT32_MAX) {
                     continue;
                 }
-                NSMutableArray<NSNumber *> *nextState = [state mutableCopy];
-                nextState[pieceIndex * 2] = @(stateCoords[pieceIndex * 2] + dRow);
-                nextState[pieceIndex * 2 + 1] = @(stateCoords[pieceIndex * 2 + 1] + dCol);
-                [queue addObject:[nextState copy]];
-                [keys addObject:nextKey];
-                [visited addObject:nextKey];
-                NSDictionary *moveInfo = @{
-                    @"identifier": order[pieceIndex],
-                    @"row": @(dRow),
-                    @"col": @(dCol)
-                };
-                parentMap[nextKey] = @{@"parent": stateKey, @"move": moveInfo};
+                HRDBFSNode child = {nextState, head, (int8_t)pieceIndex, dRow, dCol};
+                [queueData appendBytes:&child length:sizeof(HRDBFSNode)];
+                queueCount++;
             }
         }
+        head++;
     }
-    return @[];
+    
+    NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+    if (goalIndex != UINT32_MAX) {
+        HRDBFSNode *nodes = queueData.mutableBytes;
+        uint32_t cursor = goalIndex;
+        while (cursor != UINT32_MAX) {
+            HRDBFSNode node = nodes[cursor];
+            if (node.pieceIndex >= 0) {
+                NSDictionary *move = @{
+                    @"identifier": order[(NSUInteger)node.pieceIndex],
+                    @"row": @(node.dRow),
+                    @"col": @(node.dCol)
+                };
+                [result addObject:move];
+            }
+            cursor = node.parent;
+        }
+    }
+    
+    free(hashTable);
+    if (result.count == 0) {
+        return @[];
+    }
+    return [[result reverseObjectEnumerator] allObjects];
 }
 
 - (HRDPieceModel *)pieceForView:(UIView *)view
