@@ -10,6 +10,7 @@
 		342CEC5F2EE6B608009271F7 /* PuzzleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC5E2EE6B608009271F7 /* PuzzleViewController.m */; };
 		342CEC802EE6C219009271F7 /* BackdoorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC7F2EE6C219009271F7 /* BackdoorViewController.m */; };
 		342CEC872EE7D0CD009271F7 /* DifficultySelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC862EE7D0CD009271F7 /* DifficultySelectionView.m */; };
+		342CEC8D2EEB8149009271F7 /* CelebrationOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */; };
 		34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AB1B330B1B000A3F3C /* Foundation.framework */; };
 		34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */; };
 		34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
@@ -62,7 +63,6 @@
 		34C33A3E1B331D1C000A3F3C /* 6.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A361B331D1C000A3F3C /* 6.png */; };
 		34C33A3F1B331D1C000A3F3C /* 7.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A371B331D1C000A3F3C /* 7.png */; };
 		34C33A401B331D1C000A3F3C /* 8.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C33A381B331D1C000A3F3C /* 8.png */; };
-		342CEC8D2EEB8149009271F7 /* CelebrationOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
