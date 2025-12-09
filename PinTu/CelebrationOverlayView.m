@@ -90,13 +90,35 @@ static const CGFloat kButtonCornerRadius = 18.0f;
     [self addSubview:card];
     self.cardView = card;
     
-    UILabel *titleLabel = [[UILabel alloc] init];
-    titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    titleLabel.text = message.length > 0 ? message : @"太棒了！";
-    titleLabel.font = [UIFont systemFontOfSize:28.0f weight:UIFontWeightHeavy];
-    titleLabel.textColor = [UIColor whiteColor];
-    titleLabel.textAlignment = NSTextAlignmentCenter;
-    titleLabel.numberOfLines = 0;
+    NSArray<NSString *> *components = [message componentsSeparatedByString:@"\n"];
+    NSString *primaryText = components.count > 0 ? components[0] : @"";
+    NSString *secondaryText = components.count > 1 ? components[1] : nil;
+    if (primaryText.length == 0) {
+        primaryText = @"太棒了！";
+    }
+    if (secondaryText.length == 0) {
+        secondaryText = nil;
+    }
+    
+    UILabel *primaryLabel = [[UILabel alloc] init];
+    primaryLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    primaryLabel.text = primaryText;
+    primaryLabel.font = [UIFont systemFontOfSize:30.0f weight:UIFontWeightHeavy];
+    primaryLabel.textColor = [UIColor colorWithRed:1.0f green:0.80f blue:0.28f alpha:1.0f];
+    primaryLabel.textAlignment = NSTextAlignmentCenter;
+    primaryLabel.numberOfLines = 0;
+    
+    UILabel *secondaryLabel = nil;
+    if (secondaryText) {
+        UILabel *label = [[UILabel alloc] init];
+        label.translatesAutoresizingMaskIntoConstraints = NO;
+        label.text = secondaryText;
+        label.font = [UIFont systemFontOfSize:24.0f weight:UIFontWeightBold];
+        label.textColor = [UIColor whiteColor];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.numberOfLines = 0;
+        secondaryLabel = label;
+    }
     
     UILabel *detailLabel = [[UILabel alloc] init];
     detailLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -135,7 +157,15 @@ static const CGFloat kButtonCornerRadius = 18.0f;
     confirmButton.titleLabel.font = [UIFont systemFontOfSize:17.0f weight:UIFontWeightSemibold];
     [confirmButton addTarget:self action:@selector(confirmButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
-    UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[glowBadge, titleLabel, detailLabel, confirmButton]];
+    NSMutableArray<UIView *> *arrangedSubviews = [NSMutableArray array];
+    [arrangedSubviews addObject:glowBadge];
+    [arrangedSubviews addObject:primaryLabel];
+    if (secondaryLabel) {
+        [arrangedSubviews addObject:secondaryLabel];
+    }
+    [arrangedSubviews addObject:detailLabel];
+    [arrangedSubviews addObject:confirmButton];
+    UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:arrangedSubviews];
     stack.translatesAutoresizingMaskIntoConstraints = NO;
     stack.axis = UILayoutConstraintAxisVertical;
     stack.spacing = 18.0f;

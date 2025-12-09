@@ -27,6 +27,9 @@
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) BOOL autoSolving;
 @property (nonatomic, assign) PinTuShuffleDifficulty currentDifficulty;
+@property (nonatomic, strong) UIView *autoSolveHUD;
+@property (nonatomic, strong) UIActivityIndicatorView *autoSolveIndicator;
+@property (nonatomic, strong) UILabel *autoSolveLabel;
 @end
 
 @implementation PuzzleViewController
@@ -418,7 +421,7 @@
     NSInteger totalSeconds = (NSInteger)round(elapsed);
     NSInteger minutes = totalSeconds / 60;
     NSInteger seconds = totalSeconds % 60;
-    NSString *title = @"馨馨小宝贝，你太棒了！";
+    NSString *title = @"馨馨小宝贝\n你太棒了！";
     NSString *detail = [NSString stringWithFormat:@"用时 %02ld:%02ld 完成拼图，点亮完美徽章 ✨", (long)minutes, (long)seconds];
     self.timerLabel.text = [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
     
