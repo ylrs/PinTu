@@ -128,6 +128,103 @@ static inline uint32_t HRDHashInsert(HRDHashEntry *table,
     }
 }
 
+static inline uint32_t HRDHashFind(const HRDHashEntry *table,
+                                   uint32_t mask,
+                                   uint64_t key)
+{
+    uint32_t idx = (uint32_t)(key * 11400714819323198485ull) & mask;
+    while (true) {
+        uint64_t entryKey = table[idx].key;
+        if (entryKey == UINT64_MAX) {
+            return UINT32_MAX;
+        }
+        if (entryKey == key) {
+            return table[idx].value;
+        }
+        idx = (idx + 1) & mask;
+    }
+}
+
+static NSArray<NSDictionary *> *HRDRunForwardBFS(uint64_t initialState,
+                                                 const NSArray<NSString *> *order)
+{
+    NSMutableData *nodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
+    HRDBFSNode root = {initialState, UINT32_MAX, -1, 0, 0};
+    [nodesData appendBytes:&root length:sizeof(HRDBFSNode)];
+    
+    uint32_t count = 1;
+    uint32_t head = 0;
+    uint32_t goalIndex = UINT32_MAX;
+    
+    uint32_t hashCapacity = 1u << 22;
+    uint32_t hashMask = hashCapacity - 1;
+    HRDHashEntry *hashTable = calloc(hashCapacity, sizeof(HRDHashEntry));
+    if (!hashTable) {
+        return @[];
+    }
+    for (uint32_t idx = 0; idx < hashCapacity; idx++) {
+        hashTable[idx].key = UINT64_MAX;
+    }
+    HRDHashInsert(hashTable, hashMask, initialState, 0);
+    
+    while (head < count) {
+        HRDBFSNode *nodes = nodesData.mutableBytes;
+        HRDBFSNode current = nodes[head];
+        if (HRDEncodedIsGoal(current.state)) {
+            goalIndex = head;
+            break;
+        }
+        for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
+            for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
+                int8_t dRow = (int8_t)kHRDDirectionRows[direction];
+                int8_t dCol = (int8_t)kHRDDirectionCols[direction];
+                if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
+                    continue;
+                }
+                uint8_t row = HRDEncodedRow(current.state, pieceIndex);
+                uint8_t col = HRDEncodedCol(current.state, pieceIndex);
+                uint64_t nextState = HRDSetEncodedPosition(current.state,
+                                                           pieceIndex,
+                                                           (uint8_t)(row + dRow),
+                                                           (uint8_t)(col + dCol));
+                uint32_t insertResult = HRDHashInsert(hashTable, hashMask, nextState, count);
+                if (insertResult == UINT32_MAX) {
+                    continue;
+                }
+                HRDBFSNode child = {nextState, head, (int8_t)pieceIndex, dRow, dCol};
+                [nodesData appendBytes:&child length:sizeof(HRDBFSNode)];
+                count++;
+            }
+        }
+        head++;
+    }
+    
+    NSMutableArray<NSDictionary *> *moves = nil;
+    if (goalIndex != UINT32_MAX) {
+        moves = [NSMutableArray array];
+        HRDBFSNode *nodes = nodesData.mutableBytes;
+        uint32_t cursor = goalIndex;
+        while (cursor != UINT32_MAX) {
+            HRDBFSNode node = nodes[cursor];
+            if (node.pieceIndex >= 0) {
+                NSDictionary *move = @{
+                    @"identifier": order[(NSUInteger)node.pieceIndex],
+                    @"row": @(node.dRow),
+                    @"col": @(node.dCol)
+                };
+                [moves addObject:move];
+            }
+            cursor = node.parent;
+        }
+    }
+    
+    free(hashTable);
+    if (moves.count == 0) {
+        return @[];
+    }
+    return [[moves reverseObjectEnumerator] allObjects];
+}
+
 typedef NS_ENUM(NSInteger, HRDPanAxis) {
     HRDPanAxisNone = 0,
     HRDPanAxisHorizontal,
@@ -858,7 +955,7 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
                                                       order:(NSArray<NSString *> *)order
 {
     (void)sizes;
-    if (order.count != kHRDPieceCount || coords.count != kHRDPieceCount * 2 || sizes.count != kHRDPieceCount) {
+    if (order.count != kHRDPieceCount || coords.count != kHRDPieceCount * 2) {
         return @[];
     }
     
@@ -874,81 +971,170 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
         return @[];
     }
     
-    uint64_t initialState = HRDEncodeState(rows, cols, kHRDPieceCount);
-    NSMutableData *queueData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
-    HRDBFSNode root = {initialState, UINT32_MAX, -1, 0, 0};
-    [queueData appendBytes:&root length:sizeof(HRDBFSNode)];
+    static const uint8_t goalRows[kHRDPieceCount] = {0, 0, 0, 2, 2, 2, 3, 3, 4, 4};
+    static const uint8_t goalCols[kHRDPieceCount] = {1, 0, 3, 0, 3, 1, 1, 2, 0, 3};
     
-    uint32_t queueCount = 1;
-    uint32_t head = 0;
-    uint32_t goalIndex = UINT32_MAX;
+    uint64_t initialState = HRDEncodeState(rows, cols, kHRDPieceCount);
+    uint64_t goalState = HRDEncodeState(goalRows, goalCols, kHRDPieceCount);
+    if (initialState == goalState) {
+        return @[];
+    }
+    
+    NSMutableData *forwardNodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
+    HRDBFSNode forwardRoot = {initialState, UINT32_MAX, -1, 0, 0};
+    [forwardNodesData appendBytes:&forwardRoot length:sizeof(HRDBFSNode)];
+    
+    NSMutableData *backwardNodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
+    HRDBFSNode backwardRoot = {goalState, UINT32_MAX, -1, 0, 0};
+    [backwardNodesData appendBytes:&backwardRoot length:sizeof(HRDBFSNode)];
+    
+    uint32_t forwardCount = 1, forwardHead = 0;
+    uint32_t backwardCount = 1, backwardHead = 0;
+    uint32_t meetForward = UINT32_MAX, meetBackward = UINT32_MAX;
     
     uint32_t hashCapacity = 1u << 21;
     uint32_t hashMask = hashCapacity - 1;
-    HRDHashEntry *hashTable = calloc(hashCapacity, sizeof(HRDHashEntry));
-    if (!hashTable) {
+    HRDHashEntry *forwardHash = calloc(hashCapacity, sizeof(HRDHashEntry));
+    HRDHashEntry *backwardHash = calloc(hashCapacity, sizeof(HRDHashEntry));
+    if (!forwardHash || !backwardHash) {
+        free(forwardHash);
+        free(backwardHash);
         return @[];
     }
     for (uint32_t idx = 0; idx < hashCapacity; idx++) {
-        hashTable[idx].key = UINT64_MAX;
+        forwardHash[idx].key = UINT64_MAX;
+        backwardHash[idx].key = UINT64_MAX;
     }
-    HRDHashInsert(hashTable, hashMask, initialState, 0);
+    HRDHashInsert(forwardHash, hashMask, initialState, 0);
+    HRDHashInsert(backwardHash, hashMask, goalState, 0);
     
-    while (head < queueCount) {
-        HRDBFSNode *nodes = queueData.mutableBytes;
-        HRDBFSNode current = nodes[head];
-        if (HRDEncodedIsGoal(current.state)) {
-            goalIndex = head;
-            break;
-        }
-        for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
-            for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
-                int8_t dRow = (int8_t)kHRDDirectionRows[direction];
-                int8_t dCol = (int8_t)kHRDDirectionCols[direction];
-                if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
-                    continue;
+    while (forwardHead < forwardCount && backwardHead < backwardCount) {
+        BOOL expandForward = (forwardCount - forwardHead) <= (backwardCount - backwardHead);
+        if (expandForward) {
+            HRDBFSNode *forwardNodes = forwardNodesData.mutableBytes;
+            uint32_t currentIndex = forwardHead++;
+            HRDBFSNode current = forwardNodes[currentIndex];
+            for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
+                for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
+                    int8_t dRow = (int8_t)kHRDDirectionRows[direction];
+                    int8_t dCol = (int8_t)kHRDDirectionCols[direction];
+                    if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
+                        continue;
+                    }
+                    uint8_t row = HRDEncodedRow(current.state, pieceIndex);
+                    uint8_t col = HRDEncodedCol(current.state, pieceIndex);
+                    uint64_t nextState = HRDSetEncodedPosition(current.state,
+                                                               pieceIndex,
+                                                               (uint8_t)(row + dRow),
+                                                               (uint8_t)(col + dCol));
+                    uint32_t childIndex = forwardCount;
+                    uint32_t insertResult = HRDHashInsert(forwardHash, hashMask, nextState, childIndex);
+                    if (insertResult == UINT32_MAX) {
+                        continue;
+                    }
+                    HRDBFSNode child = {nextState, currentIndex, (int8_t)pieceIndex, dRow, dCol};
+                    [forwardNodesData appendBytes:&child length:sizeof(HRDBFSNode)];
+                    forwardCount++;
+                    forwardNodes = forwardNodesData.mutableBytes;
+                    
+                    uint32_t otherIndex = HRDHashFind(backwardHash, hashMask, nextState);
+                    if (otherIndex != UINT32_MAX) {
+                        meetForward = childIndex;
+                        meetBackward = otherIndex;
+                        goto HRD_SOLVER_DONE;
+                    }
                 }
-                uint8_t row = HRDEncodedRow(current.state, pieceIndex);
-                uint8_t col = HRDEncodedCol(current.state, pieceIndex);
-                uint64_t nextState = HRDSetEncodedPosition(current.state,
-                                                           pieceIndex,
-                                                           (uint8_t)(row + dRow),
-                                                           (uint8_t)(col + dCol));
-                uint32_t hashResult = HRDHashInsert(hashTable, hashMask, nextState, queueCount);
-                if (hashResult == UINT32_MAX) {
-                    continue;
+            }
+        } else {
+            HRDBFSNode *backwardNodes = backwardNodesData.mutableBytes;
+            uint32_t currentIndex = backwardHead++;
+            HRDBFSNode current = backwardNodes[currentIndex];
+            for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
+                for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
+                    int8_t dRow = (int8_t)kHRDDirectionRows[direction];
+                    int8_t dCol = (int8_t)kHRDDirectionCols[direction];
+                    if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
+                        continue;
+                    }
+                    uint8_t row = HRDEncodedRow(current.state, pieceIndex);
+                    uint8_t col = HRDEncodedCol(current.state, pieceIndex);
+                    uint64_t nextState = HRDSetEncodedPosition(current.state,
+                                                               pieceIndex,
+                                                               (uint8_t)(row + dRow),
+                                                               (uint8_t)(col + dCol));
+                    uint32_t childIndex = backwardCount;
+                    uint32_t insertResult = HRDHashInsert(backwardHash, hashMask, nextState, childIndex);
+                    if (insertResult == UINT32_MAX) {
+                        continue;
+                    }
+                    HRDBFSNode child = {nextState, currentIndex, (int8_t)pieceIndex, dRow, dCol};
+                    [backwardNodesData appendBytes:&child length:sizeof(HRDBFSNode)];
+                    backwardCount++;
+                    backwardNodes = backwardNodesData.mutableBytes;
+                    
+                    uint32_t otherIndex = HRDHashFind(forwardHash, hashMask, nextState);
+                    if (otherIndex != UINT32_MAX) {
+                        meetForward = otherIndex;
+                        meetBackward = childIndex;
+                        goto HRD_SOLVER_DONE;
+                    }
                 }
-                HRDBFSNode child = {nextState, head, (int8_t)pieceIndex, dRow, dCol};
-                [queueData appendBytes:&child length:sizeof(HRDBFSNode)];
-                queueCount++;
             }
         }
-        head++;
     }
     
-    NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
-    if (goalIndex != UINT32_MAX) {
-        HRDBFSNode *nodes = queueData.mutableBytes;
-        uint32_t cursor = goalIndex;
+HRD_SOLVER_DONE:;
+    NSMutableArray<NSDictionary *> *result = nil;
+    if (meetForward != UINT32_MAX && meetBackward != UINT32_MAX) {
+        result = [NSMutableArray array];
+        HRDBFSNode *forwardNodes = forwardNodesData.mutableBytes;
+        uint32_t cursor = meetForward;
+        NSMutableArray<NSDictionary *> *forwardMoves = [NSMutableArray array];
         while (cursor != UINT32_MAX) {
-            HRDBFSNode node = nodes[cursor];
+            HRDBFSNode node = forwardNodes[cursor];
             if (node.pieceIndex >= 0) {
                 NSDictionary *move = @{
                     @"identifier": order[(NSUInteger)node.pieceIndex],
                     @"row": @(node.dRow),
                     @"col": @(node.dCol)
                 };
-                [result addObject:move];
+                [forwardMoves addObject:move];
             }
             cursor = node.parent;
         }
+        NSArray *forwardSequence = [[forwardMoves reverseObjectEnumerator] allObjects];
+        [result addObjectsFromArray:forwardSequence];
+        
+        HRDBFSNode *backwardNodes = backwardNodesData.mutableBytes;
+        cursor = meetBackward;
+        NSMutableArray<NSDictionary *> *backwardMoves = [NSMutableArray array];
+        while (cursor != UINT32_MAX) {
+            HRDBFSNode node = backwardNodes[cursor];
+            if (node.pieceIndex >= 0) {
+                NSDictionary *move = @{
+                    @"identifier": order[(NSUInteger)node.pieceIndex],
+                    @"row": @(-node.dRow),
+                    @"col": @(-node.dCol)
+                };
+                [backwardMoves addObject:move];
+            }
+            cursor = node.parent;
+        }
+        NSArray *backwardSequence = [[backwardMoves reverseObjectEnumerator] allObjects];
+        [result addObjectsFromArray:backwardSequence];
     }
     
-    free(hashTable);
-    if (result.count == 0) {
-        return @[];
+    free(forwardHash);
+    free(backwardHash);
+    if (result.count > 0) {
+        free(forwardHash);
+        free(backwardHash);
+        return result;
     }
-    return [[result reverseObjectEnumerator] allObjects];
+    
+    free(forwardHash);
+    free(backwardHash);
+    return HRDRunForwardBFS(initialState, order);
 }
 
 - (HRDPieceModel *)pieceForView:(UIView *)view
@@ -1108,7 +1294,7 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
             [strongSelf finishAutoSolveWithSuccess:NO message:@"执行自动移动时失败。"];
             return;
         }
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.22 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [strongSelf runAutoSolveMoveAtIndex:index + 1];
         });
     }];
@@ -1136,7 +1322,7 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
     piece.row += rowDelta;
     piece.col += colDelta;
     [self occupyGridWithPiece:piece];
-    [UIView animateWithDuration:0.5f
+    [UIView animateWithDuration:0.28f
                           delay:0
                         options:UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionBeginFromCurrentState
                      animations:^{
