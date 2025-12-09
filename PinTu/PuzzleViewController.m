@@ -121,6 +121,92 @@
     self.referenceImageView = referenceView;
 }
 
+- (void)ensureAutoSolveHUD
+{
+    if (self.autoSolveHUD) {
+        return;
+    }
+    UIView *hud = [[UIView alloc] init];
+    hud.translatesAutoresizingMaskIntoConstraints = NO;
+    hud.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.55f];
+    hud.layer.cornerRadius = 18.0f;
+    hud.layer.masksToBounds = YES;
+    hud.hidden = YES;
+    hud.alpha = 0.0f;
+    
+    UIActivityIndicatorView *indicator = nil;
+    if (@available(iOS 13.0, *)) {
+        indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+    } else {
+        indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    }
+    indicator.translatesAutoresizingMaskIntoConstraints = NO;
+    indicator.color = [UIColor whiteColor];
+    indicator.hidesWhenStopped = YES;
+    
+    UILabel *label = [[UILabel alloc] init];
+    label.translatesAutoresizingMaskIntoConstraints = NO;
+    label.text = @"正在计算最佳路径…";
+    label.font = [UIFont systemFontOfSize:15.0f weight:UIFontWeightSemibold];
+    label.textColor = [UIColor whiteColor];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.numberOfLines = 0;
+    
+    UIStackView *stack = [[UIStackView alloc] initWithArrangedSubviews:@[indicator, label]];
+    stack.translatesAutoresizingMaskIntoConstraints = NO;
+    stack.axis = UILayoutConstraintAxisVertical;
+    stack.alignment = UIStackViewAlignmentCenter;
+    stack.spacing = 12.0f;
+    
+    [hud addSubview:stack];
+    [NSLayoutConstraint activateConstraints:@[
+        [stack.centerXAnchor constraintEqualToAnchor:hud.centerXAnchor],
+        [stack.centerYAnchor constraintEqualToAnchor:hud.centerYAnchor],
+        [stack.leadingAnchor constraintEqualToAnchor:hud.leadingAnchor constant:20.0f],
+        [stack.trailingAnchor constraintEqualToAnchor:hud.trailingAnchor constant:-20.0f]
+    ]];
+    
+    [self.view addSubview:hud];
+    [NSLayoutConstraint activateConstraints:@[
+        [hud.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+        [hud.centerYAnchor constraintEqualToAnchor:self.view.centerYAnchor],
+        [hud.widthAnchor constraintGreaterThanOrEqualToConstant:200.0f]
+    ]];
+    
+    self.autoSolveHUD = hud;
+    self.autoSolveIndicator = indicator;
+    self.autoSolveLabel = label;
+}
+
+- (void)showAutoSolveLoading
+{
+    [self ensureAutoSolveHUD];
+    if (!self.autoSolveHUD || !self.autoSolveIndicator) {
+        return;
+    }
+    self.autoSolveLabel.text = @"正在计算最佳路径…";
+    self.autoSolveHUD.hidden = NO;
+    [self.view bringSubviewToFront:self.autoSolveHUD];
+    [self.autoSolveIndicator startAnimating];
+    [UIView animateWithDuration:0.2 animations:^{
+        self.autoSolveHUD.alpha = 1.0f;
+    }];
+}
+
+- (void)hideAutoSolveLoading
+{
+    if (!self.autoSolveHUD || self.autoSolveHUD.hidden) {
+        return;
+    }
+    [UIView animateWithDuration:0.2 animations:^{
+        self.autoSolveHUD.alpha = 0.0f;
+    } completion:^(BOOL finished) {
+        self.autoSolveHUD.hidden = YES;
+        [self.autoSolveIndicator stopAnimating];
+    }];
+}
+
+
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
@@ -270,6 +356,7 @@
     [self stopPuzzleTimer];
     self.autoSolving = NO;
     self.puzzleView.userInteractionEnabled = YES;
+    [self hideAutoSolveLoading];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -308,6 +395,7 @@
     self.timerLabel.text = @"00:00";
     [self.puzzleView applyShuffleWithDifficulty:difficulty];
     [self startPuzzleTimerIfNeeded];
+    [self hideAutoSolveLoading];
 }
 
 - (void)toggleTileIndices:(BOOL)show
@@ -328,6 +416,7 @@
     self.timerLabel.text = @"自动中";
     self.puzzleStartDate = [NSDate date];
     [self.puzzleView resetAutoSolveProgress];
+    [self showAutoSolveLoading];
     [self performAutoSolveStepAndSchedule];
 }
 
@@ -336,6 +425,7 @@
     if (!self.puzzleView) {
         self.autoSolving = NO;
         self.puzzleView.userInteractionEnabled = YES;
+        [self hideAutoSolveLoading];
         return;
     }
     __weak typeof(self) weakSelf = self;
@@ -343,6 +433,7 @@
         if (!weakSelf) {
             return;
         }
+        [weakSelf hideAutoSolveLoading];
         if (!weakSelf.autoSolving || !hasMore) {
             weakSelf.autoSolving = NO;
             weakSelf.puzzleView.userInteractionEnabled = YES;
@@ -379,6 +470,7 @@
         [self.timer invalidate];
         self.timer = nil;
     }
+    [self hideAutoSolveLoading];
 }
 
 - (void)updateTimerLabel
@@ -405,6 +497,7 @@
     [self stopPuzzleTimer];
     self.autoSolving = NO;
     self.puzzleView.userInteractionEnabled = YES;
+    [self hideAutoSolveLoading];
 }
 
 #pragma mark - PinTuViewDelegate
@@ -434,7 +527,9 @@
         if (!strongSelf) {
             return;
         }
-        // Optional hook for future actions, currently no-op.
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [strongSelf dismissViewControllerAnimated:YES completion:nil];
+        });
     }];
 }
 
