@@ -9,6 +9,7 @@
 
 @interface BackdoorViewController ()
 @property (nonatomic, strong) UITableView *tableView;
+@property (nonatomic, strong) UISwitch *toggleSwitch;
 @end
 
 @implementation BackdoorViewController
@@ -37,28 +38,45 @@
     return 1;
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 1;
+    return 2;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *identifier = @"BackdoorCell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-    if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:identifier];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0f];
-        UISwitch *toggle = [[UISwitch alloc] initWithFrame:CGRectZero];
-        [toggle addTarget:self action:@selector(tileSwitchChanged:) forControlEvents:UIControlEventValueChanged];
-        cell.accessoryView = toggle;
+    if (indexPath.row == 0) {
+        static NSString *switchIdentifier = @"BackdoorSwitchCell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:switchIdentifier];
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:switchIdentifier];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.textLabel.font = [UIFont boldSystemFontOfSize:16.0f];
+            UISwitch *toggle = [[UISwitch alloc] initWithFrame:CGRectZero];
+            [toggle addTarget:self action:@selector(tileSwitchChanged:) forControlEvents:UIControlEventValueChanged];
+            cell.accessoryView = toggle;
+            self.toggleSwitch = toggle;
+        }
+        cell.textLabel.text = @"显示拼图块编号";
+        self.toggleSwitch.on = self.showTileIndices;
+        return cell;
+    } else {
+        static NSString *buttonIdentifier = @"BackdoorButtonCell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:buttonIdentifier];
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:buttonIdentifier];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.font = [UIFont systemFontOfSize:16.0f weight:UIFontWeightMedium];
+        }
+        cell.textLabel.text = @"自动还原拼图";
+        return cell;
     }
-    cell.textLabel.text = @"显示拼图块编号";
-    UISwitch *toggle = (UISwitch *)cell.accessoryView;
-    toggle.on = self.showTileIndices;
-    return cell;
 }
 
 #pragma mark - UITableViewDelegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.row == 1) {
+        if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
+            [self.delegate backdoorViewController:self didSelectAction:BackdoorActionAutoSolve];
+        }
+    }
 }
 
 - (void)tileSwitchChanged:(UISwitch *)sender

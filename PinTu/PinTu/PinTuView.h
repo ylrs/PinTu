@@ -21,6 +21,9 @@
     NSMutableArray *imageFrames;
     BOOL _shouldShowIndices;
     BOOL _hasCompleted;
+    NSMutableArray<NSNumber *> *autoSolveOrder;
+    NSMutableArray<NSNumber *> *boardPositions;
+    NSInteger blankIndex;
 }
 @property(nonatomic,strong)ImageViewOne *image1;
 @property(nonatomic,strong)ImageViewOne *image2;
@@ -43,4 +46,7 @@
 -(void)finish;
 - (void)configureWithImage:(UIImage *)sourceImage;
 - (void)showIndexOverlay:(BOOL)show;
+- (void)resetAutoSolveProgress;
+- (void)performAutoSolveStepWithCompletion:(void (^)(BOOL hasMore))completion;
+- (void)shuffleTiles;
 @end

@@ -24,6 +24,7 @@
 @property (nonatomic, assign) BOOL hasShownCompletionAlert;
 @property (nonatomic, strong) UILabel *timerLabel;
 @property (nonatomic, strong) NSTimer *timer;
+@property (nonatomic, assign) BOOL autoSolving;
 @end
 
 @implementation PuzzleViewController
@@ -256,6 +257,9 @@
 
 - (void)closePressed
 {
+    [self stopPuzzleTimer];
+    self.autoSolving = NO;
+    self.puzzleView.userInteractionEnabled = YES;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -265,8 +269,13 @@
     __weak typeof(self) weakSelf = self;
     BOOL shouldShow = controller.showTileIndices;
     [controller dismissViewControllerAnimated:YES completion:^{
+        if (!weakSelf) {
+            return;
+        }
         if (action == BackdoorActionShowTileIndices) {
             [weakSelf toggleTileIndices:shouldShow];
+        } else if (action == BackdoorActionAutoSolve) {
+            [weakSelf startAutoSolveSequence];
         }
     }];
 }
@@ -275,6 +284,47 @@
 {
     self.hasRevealedIndices = show;
     [self.puzzleView showIndexOverlay:show];
+}
+
+- (void)startAutoSolveSequence
+{
+    if (self.autoSolving || !self.puzzleView) {
+        return;
+    }
+    self.autoSolving = YES;
+    self.hasShownCompletionAlert = NO;
+    self.puzzleView.userInteractionEnabled = NO;
+    [self stopPuzzleTimer];
+    self.timerLabel.text = @"自动中";
+    self.puzzleStartDate = [NSDate date];
+    [self.puzzleView resetAutoSolveProgress];
+    [self performAutoSolveStepAndSchedule];
+}
+
+- (void)performAutoSolveStepAndSchedule
+{
+    if (!self.puzzleView) {
+        self.autoSolving = NO;
+        self.puzzleView.userInteractionEnabled = YES;
+        return;
+    }
+    __weak typeof(self) weakSelf = self;
+    [self.puzzleView performAutoSolveStepWithCompletion:^(BOOL hasMore) {
+        if (!weakSelf) {
+            return;
+        }
+        if (!weakSelf.autoSolving || !hasMore) {
+            weakSelf.autoSolving = NO;
+            weakSelf.puzzleView.userInteractionEnabled = YES;
+            return;
+        }
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if (!weakSelf.autoSolving) {
+                return;
+            }
+            [weakSelf performAutoSolveStepAndSchedule];
+        });
+    }];
 }
 
 - (void)startPuzzleTimerIfNeeded
@@ -323,6 +373,8 @@
 {
     [super viewWillDisappear:animated];
     [self stopPuzzleTimer];
+    self.autoSolving = NO;
+    self.puzzleView.userInteractionEnabled = YES;
 }
 
 #pragma mark - PinTuViewDelegate
@@ -332,12 +384,15 @@
         return;
     }
     self.hasShownCompletionAlert = YES;
+    self.autoSolving = NO;
+    self.puzzleView.userInteractionEnabled = YES;
     [self stopPuzzleTimer];
     NSTimeInterval elapsed = [[NSDate date] timeIntervalSinceDate:self.puzzleStartDate ?: [NSDate date]];
     NSInteger totalSeconds = (NSInteger)round(elapsed);
     NSInteger minutes = totalSeconds / 60;
     NSInteger seconds = totalSeconds % 60;
     NSString *message = [NSString stringWithFormat:@"耗时 %02ld:%02ld 完成拼图", (long)minutes, (long)seconds];
+    self.timerLabel.text = [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"恭喜" message:message preferredStyle:UIAlertControllerStyleAlert];
     [alert addAction:[UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:nil]];

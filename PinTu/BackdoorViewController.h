@@ -9,6 +9,7 @@
 
 typedef NS_ENUM(NSInteger, BackdoorAction) {
     BackdoorActionShowTileIndices = 0,
+    BackdoorActionAutoSolve = 1,
 };
 
 @class BackdoorViewController;
