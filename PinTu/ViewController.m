@@ -12,6 +12,7 @@
 #import "PuzzleViewController.h"
 #import "DifficultySelectionView.h"
 #import "PinTu/PinTuView.h"
+#import "HuaRongDaoViewController.h"
 
 static NSString * const kUserAddedImageFilenamesKey = @"UserAddedImageFilenames";
 static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
@@ -66,19 +67,42 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
 }
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return mb_puzzleItems.count + 1;
+    return mb_puzzleItems.count + 2;
 }
 -(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"CollectionViewCell" forIndexPath:indexPath];
-    if (indexPath.row < mb_puzzleItems.count) {
-        id item = mb_puzzleItems[indexPath.row];
+    cell.mb_imageView.image = nil;
+    cell.mb_imageView.backgroundColor = [UIColor clearColor];
+    cell.mb_imageView.contentMode = UIViewContentModeScaleAspectFill;
+    cell.mb_label.hidden = YES;
+    cell.mb_label.text = nil;
+    cell.mb_label.numberOfLines = 1;
+    cell.mb_label.font = [UIFont boldSystemFontOfSize:48.0f];
+    cell.mb_label.textColor = [UIColor darkGrayColor];
+    cell.mb_label.backgroundColor = [UIColor clearColor];
+    
+    if (indexPath.row == 0) {
+        UIImage *coverImage = [UIImage imageNamed:@"caocao"];
+        cell.mb_imageView.image = coverImage;
+        cell.mb_imageView.contentMode = UIViewContentModeScaleAspectFill;
+        cell.mb_imageView.backgroundColor = coverImage ? [UIColor blackColor] : [UIColor colorWithRed:0.27f green:0.20f blue:0.65f alpha:1.0f];
+        cell.mb_label.hidden = NO;
+        cell.mb_label.text = @"三国\n华容道";
+        cell.mb_label.numberOfLines = 2;
+        cell.mb_label.font = [UIFont boldSystemFontOfSize:22.0f];
+        cell.mb_label.textColor = [UIColor whiteColor];
+        cell.mb_label.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.45f];
+    } else if (indexPath.row <= mb_puzzleItems.count) {
+        NSInteger puzzleIndex = indexPath.row - 1;
+        id item = mb_puzzleItems[puzzleIndex];
         UIImage *image = [self imageForPuzzleItem:item];
         cell.mb_imageView.image = image;
         cell.mb_imageView.contentMode = UIViewContentModeScaleAspectFill;
         cell.mb_imageView.backgroundColor = image ? [UIColor whiteColor] : [UIColor colorWithWhite:0.95f alpha:1.0f];
         cell.mb_label.hidden = YES;
         cell.mb_label.text = nil;
+        cell.mb_label.backgroundColor = [UIColor clearColor];
     } else {
         cell.mb_imageView.image = nil;
         cell.mb_imageView.backgroundColor = [UIColor colorWithWhite:0.92f alpha:1.0f];
@@ -87,16 +111,22 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
         cell.mb_label.text = @"+";
         cell.mb_label.font = [UIFont boldSystemFontOfSize:52.0f];
         cell.mb_label.textColor = [UIColor colorWithWhite:0 alpha:0.35f];
+        cell.mb_label.backgroundColor = [UIColor clearColor];
     }
     return cell;
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row == mb_puzzleItems.count) {
+    if (indexPath.row == 0) {
+        [self presentHuaRongDao];
+        return;
+    }
+    if (indexPath.row == mb_puzzleItems.count + 1) {
         [self addPhotoTapped];
         return;
     }
-    [self showPuzzleForIndex:indexPath.row];
+    NSInteger puzzleIndex = indexPath.row - 1;
+    [self showPuzzleForIndex:puzzleIndex];
 }
 -(BOOL)shouldAutorotate
 {
@@ -262,7 +292,7 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     [mb_collectionView reloadData];
     NSInteger lastIndex = mb_puzzleItems.count - 1;
     if (lastIndex >= 0) {
-        NSIndexPath *lastPath = [NSIndexPath indexPathForRow:lastIndex inSection:0];
+        NSIndexPath *lastPath = [NSIndexPath indexPathForRow:lastIndex + 1 inSection:0];
         dispatch_async(dispatch_get_main_queue(), ^{
             [mb_collectionView scrollToItemAtIndexPath:lastPath atScrollPosition:UICollectionViewScrollPositionBottom animated:YES];
         });
@@ -320,6 +350,12 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
         return image;
     }
     return nil;
+}
+-(void)presentHuaRongDao
+{
+    HuaRongDaoViewController *controller = [[HuaRongDaoViewController alloc] init];
+    controller.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:controller animated:YES completion:nil];
 }
 -(void)showSimpleAlertWithTitle:(NSString *)title message:(NSString *)message
 {

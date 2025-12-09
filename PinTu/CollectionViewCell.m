@@ -27,6 +27,9 @@
         self.mb_label.textAlignment = NSTextAlignmentCenter;
         self.mb_label.font = [UIFont boldSystemFontOfSize:48.0f];
         self.mb_label.textColor = [UIColor darkGrayColor];
+        self.mb_label.numberOfLines = 0;
+        self.mb_label.adjustsFontSizeToFitWidth = YES;
+        self.mb_label.minimumScaleFactor = 0.6f;
         self.mb_label.hidden = YES;
         [self.contentView addSubview:self.mb_label];
         
@@ -42,6 +45,10 @@
     self.mb_imageView.backgroundColor = [UIColor clearColor];
     self.mb_label.hidden = YES;
     self.mb_label.text = nil;
+    self.mb_label.font = [UIFont boldSystemFontOfSize:48.0f];
+    self.mb_label.textColor = [UIColor darkGrayColor];
+    self.mb_label.numberOfLines = 1;
+    self.mb_label.backgroundColor = [UIColor clearColor];
 }
 
 /*

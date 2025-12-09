@@ -231,7 +231,7 @@ static inline NSInteger PTColForIndex(NSInteger index) {
 {
     switch (self.shuffleDifficulty) {
         case PinTuShuffleDifficultySimple:
-            return 60;
+            return 20;
         case PinTuShuffleDifficultyHard:
             return 160;
         case PinTuShuffleDifficultyHell:
