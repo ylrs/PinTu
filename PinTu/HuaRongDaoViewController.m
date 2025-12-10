@@ -35,6 +35,27 @@ typedef struct {
     uint32_t value;
 } HRDHashEntry;
 
+typedef struct {
+    uint64_t key;
+    uint16_t g;
+} HRDGHashEntry;
+
+typedef struct {
+    uint64_t state;
+    uint32_t parent;
+    uint16_t g;
+    uint16_t f;
+    int8_t pieceIndex;
+    int8_t dRow;
+    int8_t dCol;
+} HRDAStarNode;
+
+typedef struct {
+    uint32_t index;
+    uint16_t f;
+    uint16_t g;
+} HRDHeapEntry;
+
 static inline uint64_t HRDEncodeState(const uint8_t *rows, const uint8_t *cols, uint8_t pieceCount)
 {
     uint64_t state = 0;
@@ -145,6 +166,30 @@ static inline uint32_t HRDHashFind(const HRDHashEntry *table,
     }
 }
 
+static inline BOOL HRDGHashInsertOrUpdate(HRDGHashEntry *table,
+                                          uint32_t mask,
+                                          uint64_t key,
+                                          uint16_t g)
+{
+    uint32_t idx = (uint32_t)(key * 11400714819323198485ull) & mask;
+    while (true) {
+        uint64_t entryKey = table[idx].key;
+        if (entryKey == UINT64_MAX) {
+            table[idx].key = key;
+            table[idx].g = g;
+            return YES;
+        }
+        if (entryKey == key) {
+            if (g < table[idx].g) {
+                table[idx].g = g;
+                return YES;
+            }
+            return NO;
+        }
+        idx = (idx + 1) & mask;
+    }
+}
+
 static NSArray<NSDictionary *> *HRDRunForwardBFS(uint64_t initialState,
                                                  const NSArray<NSString *> *order)
 {
@@ -225,6 +270,205 @@ static NSArray<NSDictionary *> *HRDRunForwardBFS(uint64_t initialState,
     return [[moves reverseObjectEnumerator] allObjects];
 }
 
+static inline uint16_t HRDHeuristic(uint64_t state)
+{
+    uint8_t row = HRDEncodedRow(state, 0);
+    uint8_t col = HRDEncodedCol(state, 0);
+    uint16_t distance = (uint16_t)((3 - row) * 2);
+    if (col != 1) {
+        distance += 1;
+    }
+    return distance;
+}
+
+static NSArray<NSDictionary *> *HRDPrecomputedInitialSolution(void)
+{
+    static NSArray<NSDictionary *> *cachedMoves = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        cachedMoves = @[
+        @{@"identifier": @"bing1", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @0, @"col": @1},
+        @{@"identifier": @"ma", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @-1},
+        @{@"identifier": @"ma", @"row": @1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @0, @"col": @-1},
+        @{@"identifier": @"guan", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing2", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing4", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @-1, @"col": @0},
+        @{@"identifier": @"ma", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @-1},
+        @{@"identifier": @"ma", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @1},
+        @{@"identifier": @"guan", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @-1},
+        @{@"identifier": @"ma", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhao", @"row": @1, @"col": @0},
+        @{@"identifier": @"zhao", @"row": @1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @0, @"col": @1},
+        @{@"identifier": @"zhang", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing4", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @-1, @"col": @0},
+        @{@"identifier": @"ma", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhang", @"row": @1, @"col": @0},
+        @{@"identifier": @"zhang", @"row": @1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhao", @"row": @-1, @"col": @0},
+        @{@"identifier": @"zhao", @"row": @-1, @"col": @0},
+        @{@"identifier": @"huang", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing3", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @-1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @0, @"col": @1},
+        @{@"identifier": @"ma", @"row": @1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @0, @"col": @1},
+        @{@"identifier": @"zhang", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @-1},
+        @{@"identifier": @"cao", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing2", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing3", @"row": @-1, @"col": @0},
+        @{@"identifier": @"ma", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @-1, @"col": @0},
+        @{@"identifier": @"ma", @"row": @-1, @"col": @0},
+        @{@"identifier": @"zhang", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing1", @"row": @1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhao", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"huang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing2", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @1},
+        @{@"identifier": @"ma", @"row": @-1, @"col": @0},
+        @{@"identifier": @"zhang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing2", @"row": @1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @1, @"col": @0},
+        @{@"identifier": @"huang", @"row": @1, @"col": @0},
+        @{@"identifier": @"zhao", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @1},
+        @{@"identifier": @"ma", @"row": @0, @"col": @1},
+        @{@"identifier": @"zhang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"zhang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"cao", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhao", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing4", @"row": @-1, @"col": @0},
+        @{@"identifier": @"huang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing2", @"row": @0, @"col": @1},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"cao", @"row": @1, @"col": @0},
+        @{@"identifier": @"zhang", @"row": @1, @"col": @0},
+        @{@"identifier": @"ma", @"row": @1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @-1},
+        @{@"identifier": @"zhao", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing4", @"row": @0, @"col": @-1},
+        @{@"identifier": @"bing3", @"row": @0, @"col": @-1},
+        @{@"identifier": @"huang", @"row": @-1, @"col": @0},
+        @{@"identifier": @"guan", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @-1, @"col": @0},
+        @{@"identifier": @"bing1", @"row": @0, @"col": @1},
+        @{@"identifier": @"cao", @"row": @0, @"col": @1},
+        ];
+    });
+    return cachedMoves;
+}
+
+static void HRDHeapPush(NSMutableData *heapData, uint32_t *heapSize, HRDHeapEntry entry)
+{
+    [heapData appendBytes:&entry length:sizeof(HRDHeapEntry)];
+    HRDHeapEntry *heap = heapData.mutableBytes;
+    uint32_t pos = *heapSize;
+    while (pos > 0) {
+        uint32_t parent = (pos - 1) / 2;
+        HRDHeapEntry parentEntry = heap[parent];
+        if (parentEntry.f < entry.f || (parentEntry.f == entry.f && parentEntry.g <= entry.g)) {
+            break;
+        }
+        heap[pos] = parentEntry;
+        pos = parent;
+    }
+    heap[pos] = entry;
+    (*heapSize)++;
+}
+
+static BOOL HRDHeapPop(NSMutableData *heapData, uint32_t *heapSize, HRDHeapEntry *outEntry)
+{
+    if (*heapSize == 0) {
+        return NO;
+    }
+    HRDHeapEntry *heap = heapData.mutableBytes;
+    *outEntry = heap[0];
+    uint32_t lastIndex = --(*heapSize);
+    if (*heapSize == 0) {
+        heapData.length = 0;
+        return YES;
+    }
+    HRDHeapEntry last = heap[lastIndex];
+    uint32_t pos = 0;
+    while (true) {
+        uint32_t left = pos * 2 + 1;
+        if (left >= *heapSize) {
+            break;
+        }
+        uint32_t right = left + 1;
+        uint32_t smallest = left;
+        if (right < *heapSize) {
+            HRDHeapEntry leftEntry = heap[left];
+            HRDHeapEntry rightEntry = heap[right];
+            if (rightEntry.f < leftEntry.f || (rightEntry.f == leftEntry.f && rightEntry.g < leftEntry.g)) {
+                smallest = right;
+            }
+        }
+        HRDHeapEntry smallestEntry = heap[smallest];
+        if (smallestEntry.f > last.f || (smallestEntry.f == last.f && smallestEntry.g >= last.g)) {
+            break;
+        }
+        heap[pos] = smallestEntry;
+        pos = smallest;
+    }
+    heap[pos] = last;
+    heapData.length = (*heapSize) * sizeof(HRDHeapEntry);
+    return YES;
+}
+
+
 typedef NS_ENUM(NSInteger, HRDPanAxis) {
     HRDPanAxisNone = 0,
     HRDPanAxisHorizontal,
@@ -273,6 +517,9 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
 @property (nonatomic, assign) BOOL autoSolving;
 @property (nonatomic, strong, nullable) NSArray<NSDictionary *> *pendingAutoSolveMoves;
 @property (nonatomic, strong) dispatch_queue_t solverQueue;
+@property (nonatomic, strong, nullable) dispatch_block_t autoSolveTimeoutBlock;
+@property (nonatomic, strong) UIView *exitIndicatorView;
+@property (nonatomic, strong) UILabel *exitIndicatorLabel;
 @end
 
 @implementation HuaRongDaoViewController
@@ -344,18 +591,24 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
     CGFloat boardX = (viewWidth - boardWidth) / 2.0f;
     self.boardContainer.frame = CGRectMake(boardX, boardTop, boardWidth, boardHeight);
     
-    CGFloat hintTop = CGRectGetMaxY(self.boardContainer.frame) + 20.0f;
-    self.hintLabel.frame = CGRectMake(horizontalMargin,
-                                      hintTop,
-                                      viewWidth - horizontalMargin * 2.0f,
-                                      44.0f);
-    
     BOOL cellSizeChanged = fabs(cellSize - self.cellSize) > 0.1f;
     self.cellSize = cellSize;
     if (cellSizeChanged || !self.hasLayedOutSubviews) {
         [self layoutPiecesAnimated:NO];
         self.hasLayedOutSubviews = YES;
     }
+    
+    [self layoutExitIndicator];
+    
+    CGFloat hintTopBase = CGRectGetMaxY(self.boardContainer.frame) + 20.0f;
+    CGFloat hintTop = hintTopBase;
+    if (self.exitIndicatorView && !self.exitIndicatorView.hidden) {
+        hintTop = CGRectGetMaxY(self.exitIndicatorView.frame) + 16.0f;
+    }
+    self.hintLabel.frame = CGRectMake(horizontalMargin,
+                                      hintTop,
+                                      viewWidth - horizontalMargin * 2.0f,
+                                      44.0f);
 }
 
 #pragma mark - Interface configuration
@@ -411,6 +664,28 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
     board.layer.borderColor = [UIColor colorWithWhite:0.85f alpha:1.0f].CGColor;
     [self.view addSubview:board];
     self.boardContainer = board;
+    
+    UIView *exitIndicator = [[UIView alloc] initWithFrame:CGRectZero];
+    exitIndicator.userInteractionEnabled = NO;
+    exitIndicator.layer.cornerRadius = 18.0f;
+    exitIndicator.layer.masksToBounds = NO;
+    exitIndicator.backgroundColor = [UIColor colorWithRed:0.99f green:0.92f blue:0.76f alpha:0.95f];
+    exitIndicator.layer.shadowColor = [UIColor colorWithWhite:0 alpha:0.15f].CGColor;
+    exitIndicator.layer.shadowOpacity = 0.8f;
+    exitIndicator.layer.shadowRadius = 10.0f;
+    exitIndicator.layer.shadowOffset = CGSizeMake(0, 6.0f);
+    exitIndicator.layer.borderWidth = 2.0f;
+    exitIndicator.layer.borderColor = [UIColor colorWithRed:0.90f green:0.54f blue:0.21f alpha:1.0f].CGColor;
+    [self.view addSubview:exitIndicator];
+    self.exitIndicatorView = exitIndicator;
+    
+    UILabel *exitLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    exitLabel.text = @"出口";
+    exitLabel.font = [UIFont systemFontOfSize:18.0f weight:UIFontWeightSemibold];
+    exitLabel.textAlignment = NSTextAlignmentCenter;
+    exitLabel.textColor = [UIColor colorWithRed:0.72f green:0.28f blue:0.05f alpha:1.0f];
+    [exitIndicator addSubview:exitLabel];
+    self.exitIndicatorLabel = exitLabel;
     
     UIActivityIndicatorView *indicator = nil;
     if (@available(iOS 13.0, *)) {
@@ -508,6 +783,16 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
              @"bing4"];
 }
 
+- (NSArray<NSDictionary *> *)precomputedAutoSolveMovesIfPossible
+{
+    for (HRDPieceModel *piece in self.pieces) {
+        if (piece.row != piece.originalRow || piece.col != piece.originalCol) {
+            return nil;
+        }
+    }
+    return HRDPrecomputedInitialSolution();
+}
+
 - (HRDPieceModel *)pieceWithIdentifier:(NSString *)identifier
 {
     if (identifier.length == 0) {
@@ -542,6 +827,61 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
         }
     });
     return cachedFont;
+}
+
+- (void)invalidateAutoSolveTimeout
+{
+    if (self.autoSolveTimeoutBlock) {
+        dispatch_block_cancel(self.autoSolveTimeoutBlock);
+        self.autoSolveTimeoutBlock = nil;
+    }
+}
+
+- (void)scheduleAutoSolveTimeoutWithInterval:(NSTimeInterval)interval
+{
+    [self invalidateAutoSolveTimeout];
+    __weak typeof(self) weakSelf = self;
+    dispatch_block_t timeoutBlock = dispatch_block_create(0, ^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf || !strongSelf.autoSolving) {
+            return;
+        }
+        strongSelf.autoSolveTimeoutBlock = nil;
+        [strongSelf finishAutoSolveWithSuccess:NO message:@"自动过关耗时过长，请稍后再试。"];
+    });
+    self.autoSolveTimeoutBlock = timeoutBlock;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(interval * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(),
+                   timeoutBlock);
+}
+
+- (void)layoutExitIndicator
+{
+    if (!self.exitIndicatorView) {
+        return;
+    }
+    CGFloat cellSize = self.cellSize;
+    if (cellSize <= 0.0f) {
+        self.exitIndicatorView.hidden = YES;
+        self.exitIndicatorView.layer.shadowPath = nil;
+        return;
+    }
+    self.exitIndicatorView.hidden = NO;
+    CGFloat indicatorWidth = MAX(168.0f, cellSize * 2.4f);
+    CGFloat indicatorHeight = MAX(44.0f, MIN(64.0f, cellSize * 0.95f));
+    CGFloat exitCenterX = CGRectGetMinX(self.boardContainer.frame) + cellSize * 2.0f;
+    CGFloat indicatorX = exitCenterX - indicatorWidth / 2.0f;
+    CGFloat indicatorY = CGRectGetMaxY(self.boardContainer.frame) + 8.0f;
+    self.exitIndicatorView.frame = CGRectMake(indicatorX, indicatorY, indicatorWidth, indicatorHeight);
+    
+    CGFloat horizontalPadding = 20.0f;
+    self.exitIndicatorLabel.frame = CGRectMake(horizontalPadding,
+                                               0,
+                                               indicatorWidth - horizontalPadding * 2.0f,
+                                               indicatorHeight);
+    self.exitIndicatorView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:self.exitIndicatorView.bounds
+                                                                          cornerRadius:self.exitIndicatorView.layer.cornerRadius].CGPath;
+    [self.view bringSubviewToFront:self.exitIndicatorView];
 }
 
 - (UIFont *)mainTitleFont
@@ -958,7 +1298,6 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
     if (order.count != kHRDPieceCount || coords.count != kHRDPieceCount * 2) {
         return @[];
     }
-    
     uint8_t rows[kHRDPieceCount];
     uint8_t cols[kHRDPieceCount];
     for (uint8_t idx = 0; idx < kHRDPieceCount; idx++) {
@@ -966,177 +1305,86 @@ typedef NS_ENUM(NSInteger, HRDPanAxis) {
         rows[idx] = (uint8_t)coords[rowIndex].integerValue;
         cols[idx] = (uint8_t)coords[rowIndex + 1].integerValue;
     }
-    
     if (rows[0] == 3 && cols[0] == 1) {
         return @[];
     }
-    
-    static const uint8_t goalRows[kHRDPieceCount] = {0, 0, 0, 2, 2, 2, 3, 3, 4, 4};
-    static const uint8_t goalCols[kHRDPieceCount] = {1, 0, 3, 0, 3, 1, 1, 2, 0, 3};
-    
     uint64_t initialState = HRDEncodeState(rows, cols, kHRDPieceCount);
-    uint64_t goalState = HRDEncodeState(goalRows, goalCols, kHRDPieceCount);
-    if (initialState == goalState) {
-        return @[];
-    }
-    
-    NSMutableData *forwardNodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
-    HRDBFSNode forwardRoot = {initialState, UINT32_MAX, -1, 0, 0};
-    [forwardNodesData appendBytes:&forwardRoot length:sizeof(HRDBFSNode)];
-    
-    NSMutableData *backwardNodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDBFSNode)];
-    HRDBFSNode backwardRoot = {goalState, UINT32_MAX, -1, 0, 0};
-    [backwardNodesData appendBytes:&backwardRoot length:sizeof(HRDBFSNode)];
-    
-    uint32_t forwardCount = 1, forwardHead = 0;
-    uint32_t backwardCount = 1, backwardHead = 0;
-    uint32_t meetForward = UINT32_MAX, meetBackward = UINT32_MAX;
-    
-    uint32_t hashCapacity = 1u << 21;
+    NSMutableData *nodesData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDAStarNode)];
+    HRDAStarNode root = {initialState, UINT32_MAX, 0, HRDHeuristic(initialState), -1, 0, 0};
+    [nodesData appendBytes:&root length:sizeof(HRDAStarNode)];
+    NSMutableData *heapData = [NSMutableData dataWithCapacity:4096 * sizeof(HRDHeapEntry)];
+    uint32_t heapSize = 0;
+    HRDHeapEntry rootEntry = {0, root.f, root.g};
+    HRDHeapPush(heapData, &heapSize, rootEntry);
+    uint32_t nodeCount = 1;
+    uint32_t hashCapacity = 1u << 22;
     uint32_t hashMask = hashCapacity - 1;
-    HRDHashEntry *forwardHash = calloc(hashCapacity, sizeof(HRDHashEntry));
-    HRDHashEntry *backwardHash = calloc(hashCapacity, sizeof(HRDHashEntry));
-    if (!forwardHash || !backwardHash) {
-        free(forwardHash);
-        free(backwardHash);
+    HRDGHashEntry *gTable = calloc(hashCapacity, sizeof(HRDGHashEntry));
+    if (!gTable) {
         return @[];
     }
     for (uint32_t idx = 0; idx < hashCapacity; idx++) {
-        forwardHash[idx].key = UINT64_MAX;
-        backwardHash[idx].key = UINT64_MAX;
+        gTable[idx].key = UINT64_MAX;
     }
-    HRDHashInsert(forwardHash, hashMask, initialState, 0);
-    HRDHashInsert(backwardHash, hashMask, goalState, 0);
-    
-    while (forwardHead < forwardCount && backwardHead < backwardCount) {
-        BOOL expandForward = (forwardCount - forwardHead) <= (backwardCount - backwardHead);
-        if (expandForward) {
-            HRDBFSNode *forwardNodes = forwardNodesData.mutableBytes;
-            uint32_t currentIndex = forwardHead++;
-            HRDBFSNode current = forwardNodes[currentIndex];
-            for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
-                for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
-                    int8_t dRow = (int8_t)kHRDDirectionRows[direction];
-                    int8_t dCol = (int8_t)kHRDDirectionCols[direction];
-                    if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
-                        continue;
-                    }
-                    uint8_t row = HRDEncodedRow(current.state, pieceIndex);
-                    uint8_t col = HRDEncodedCol(current.state, pieceIndex);
-                    uint64_t nextState = HRDSetEncodedPosition(current.state,
-                                                               pieceIndex,
-                                                               (uint8_t)(row + dRow),
-                                                               (uint8_t)(col + dCol));
-                    uint32_t childIndex = forwardCount;
-                    uint32_t insertResult = HRDHashInsert(forwardHash, hashMask, nextState, childIndex);
-                    if (insertResult == UINT32_MAX) {
-                        continue;
-                    }
-                    HRDBFSNode child = {nextState, currentIndex, (int8_t)pieceIndex, dRow, dCol};
-                    [forwardNodesData appendBytes:&child length:sizeof(HRDBFSNode)];
-                    forwardCount++;
-                    forwardNodes = forwardNodesData.mutableBytes;
-                    
-                    uint32_t otherIndex = HRDHashFind(backwardHash, hashMask, nextState);
-                    if (otherIndex != UINT32_MAX) {
-                        meetForward = childIndex;
-                        meetBackward = otherIndex;
-                        goto HRD_SOLVER_DONE;
-                    }
+    HRDGHashInsertOrUpdate(gTable, hashMask, initialState, 0);
+    while (heapSize > 0) {
+        HRDHeapEntry entry;
+        if (!HRDHeapPop(heapData, &heapSize, &entry)) {
+            break;
+        }
+        HRDAStarNode *nodes = nodesData.mutableBytes;
+        HRDAStarNode current = nodes[entry.index];
+        if (current.f != entry.f || current.g != entry.g) {
+            continue;
+        }
+        if (HRDEncodedIsGoal(current.state)) {
+            NSMutableArray<NSDictionary *> *moves = [NSMutableArray array];
+            uint32_t cursor = entry.index;
+            while (cursor != UINT32_MAX) {
+                HRDAStarNode node = nodes[cursor];
+                if (node.pieceIndex >= 0) {
+                    NSDictionary *move = @{
+                        @"identifier": order[(NSUInteger)node.pieceIndex],
+                        @"row": @(node.dRow),
+                        @"col": @(node.dCol)
+                    };
+                    [moves addObject:move];
                 }
+                cursor = node.parent;
             }
-        } else {
-            HRDBFSNode *backwardNodes = backwardNodesData.mutableBytes;
-            uint32_t currentIndex = backwardHead++;
-            HRDBFSNode current = backwardNodes[currentIndex];
-            for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
-                for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
-                    int8_t dRow = (int8_t)kHRDDirectionRows[direction];
-                    int8_t dCol = (int8_t)kHRDDirectionCols[direction];
-                    if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
-                        continue;
-                    }
-                    uint8_t row = HRDEncodedRow(current.state, pieceIndex);
-                    uint8_t col = HRDEncodedCol(current.state, pieceIndex);
-                    uint64_t nextState = HRDSetEncodedPosition(current.state,
-                                                               pieceIndex,
-                                                               (uint8_t)(row + dRow),
-                                                               (uint8_t)(col + dCol));
-                    uint32_t childIndex = backwardCount;
-                    uint32_t insertResult = HRDHashInsert(backwardHash, hashMask, nextState, childIndex);
-                    if (insertResult == UINT32_MAX) {
-                        continue;
-                    }
-                    HRDBFSNode child = {nextState, currentIndex, (int8_t)pieceIndex, dRow, dCol};
-                    [backwardNodesData appendBytes:&child length:sizeof(HRDBFSNode)];
-                    backwardCount++;
-                    backwardNodes = backwardNodesData.mutableBytes;
-                    
-                    uint32_t otherIndex = HRDHashFind(forwardHash, hashMask, nextState);
-                    if (otherIndex != UINT32_MAX) {
-                        meetForward = otherIndex;
-                        meetBackward = childIndex;
-                        goto HRD_SOLVER_DONE;
-                    }
+            free(gTable);
+            return [[moves reverseObjectEnumerator] allObjects];
+        }
+        for (uint8_t pieceIndex = 0; pieceIndex < kHRDPieceCount; pieceIndex++) {
+            for (NSInteger direction = 0; direction < kHRDDirectionCount; direction++) {
+                int8_t dRow = (int8_t)kHRDDirectionRows[direction];
+                int8_t dCol = (int8_t)kHRDDirectionCols[direction];
+                if (!HRDCanMoveInState(current.state, pieceIndex, dRow, dCol)) {
+                    continue;
                 }
+                uint8_t row = HRDEncodedRow(current.state, pieceIndex);
+                uint8_t col = HRDEncodedCol(current.state, pieceIndex);
+                uint64_t nextState = HRDSetEncodedPosition(current.state,
+                                                           pieceIndex,
+                                                           (uint8_t)(row + dRow),
+                                                           (uint8_t)(col + dCol));
+                uint16_t nextG = current.g + 1;
+                if (!HRDGHashInsertOrUpdate(gTable, hashMask, nextState, nextG)) {
+                    continue;
+                }
+                uint16_t heuristic = HRDHeuristic(nextState);
+                HRDAStarNode child = {nextState, entry.index, nextG, (uint16_t)(nextG + heuristic), (int8_t)pieceIndex, dRow, dCol};
+                [nodesData appendBytes:&child length:sizeof(HRDAStarNode)];
+                uint32_t childIndex = nodeCount++;
+                nodes = nodesData.mutableBytes;
+                HRDHeapEntry newEntry = {childIndex, child.f, child.g};
+                HRDHeapPush(heapData, &heapSize, newEntry);
             }
         }
     }
-    
-HRD_SOLVER_DONE:;
-    NSMutableArray<NSDictionary *> *result = nil;
-    if (meetForward != UINT32_MAX && meetBackward != UINT32_MAX) {
-        result = [NSMutableArray array];
-        HRDBFSNode *forwardNodes = forwardNodesData.mutableBytes;
-        uint32_t cursor = meetForward;
-        NSMutableArray<NSDictionary *> *forwardMoves = [NSMutableArray array];
-        while (cursor != UINT32_MAX) {
-            HRDBFSNode node = forwardNodes[cursor];
-            if (node.pieceIndex >= 0) {
-                NSDictionary *move = @{
-                    @"identifier": order[(NSUInteger)node.pieceIndex],
-                    @"row": @(node.dRow),
-                    @"col": @(node.dCol)
-                };
-                [forwardMoves addObject:move];
-            }
-            cursor = node.parent;
-        }
-        NSArray *forwardSequence = [[forwardMoves reverseObjectEnumerator] allObjects];
-        [result addObjectsFromArray:forwardSequence];
-        
-        HRDBFSNode *backwardNodes = backwardNodesData.mutableBytes;
-        cursor = meetBackward;
-        NSMutableArray<NSDictionary *> *backwardMoves = [NSMutableArray array];
-        while (cursor != UINT32_MAX) {
-            HRDBFSNode node = backwardNodes[cursor];
-            if (node.pieceIndex >= 0) {
-                NSDictionary *move = @{
-                    @"identifier": order[(NSUInteger)node.pieceIndex],
-                    @"row": @(-node.dRow),
-                    @"col": @(-node.dCol)
-                };
-                [backwardMoves addObject:move];
-            }
-            cursor = node.parent;
-        }
-        NSArray *backwardSequence = [[backwardMoves reverseObjectEnumerator] allObjects];
-        [result addObjectsFromArray:backwardSequence];
-    }
-    
-    free(forwardHash);
-    free(backwardHash);
-    if (result.count > 0) {
-        free(forwardHash);
-        free(backwardHash);
-        return result;
-    }
-    
-    free(forwardHash);
-    free(backwardHash);
+    free(gTable);
     return HRDRunForwardBFS(initialState, order);
 }
-
 - (HRDPieceModel *)pieceForView:(UIView *)view
 {
     for (HRDPieceModel *piece in self.pieces) {
@@ -1185,6 +1433,7 @@ HRD_SOLVER_DONE:;
 
 - (void)beginAutoSolve
 {
+    [self invalidateAutoSolveTimeout];
     NSArray<NSString *> *order = [self solverPieceOrder];
     NSMutableArray<NSNumber *> *coords = [NSMutableArray arrayWithCapacity:order.count * 2];
     NSMutableArray<NSValue *> *sizes = [NSMutableArray arrayWithCapacity:order.count];
@@ -1206,6 +1455,17 @@ HRD_SOLVER_DONE:;
         return;
     }
     
+    NSArray<NSDictionary *> *precomputed = [self precomputedAutoSolveMovesIfPossible];
+    if (precomputed.count > 0) {
+        self.autoSolving = YES;
+        [self setControlsEnabled:NO];
+        [self.autoSolveIndicator startAnimating];
+        self.boardContainer.userInteractionEnabled = NO;
+        self.pendingAutoSolveMoves = precomputed;
+        [self runAutoSolveMoveAtIndex:0];
+        return;
+    }
+    
     self.autoSolving = YES;
     [self setControlsEnabled:NO];
     [self.autoSolveIndicator startAnimating];
@@ -1216,12 +1476,15 @@ HRD_SOLVER_DONE:;
     __weak typeof(self) weakSelf = self;
     dispatch_async(self.solverQueue, ^{
         @autoreleasepool {
-            NSArray<NSDictionary *> *moves = [weakSelf computeAutoSolveMovesWithCoords:coordsCopy
-                                                                                  sizes:sizesCopy
-                                                                                  order:order];
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            NSArray<NSDictionary *> *moves = [strongSelf computeAutoSolveMovesWithCoords:coordsCopy
+                                                                                    sizes:sizesCopy
+                                                                                    order:order];
             dispatch_async(dispatch_get_main_queue(), ^{
-                __strong typeof(weakSelf) strongSelf = weakSelf;
-                if (!strongSelf || !strongSelf.autoSolving) {
+                if (!strongSelf.autoSolving) {
                     return;
                 }
                 if (moves.count == 0) {
@@ -1233,10 +1496,12 @@ HRD_SOLVER_DONE:;
             });
         }
     });
+    [self scheduleAutoSolveTimeoutWithInterval:12.0];
 }
 
 - (void)cancelAutoSolve
 {
+    [self invalidateAutoSolveTimeout];
     self.autoSolving = NO;
     self.pendingAutoSolveMoves = nil;
     [self.autoSolveIndicator stopAnimating];
@@ -1246,6 +1511,7 @@ HRD_SOLVER_DONE:;
 
 - (void)finishAutoSolveWithSuccess:(BOOL)success message:(NSString *)message
 {
+    [self invalidateAutoSolveTimeout];
     [self.autoSolveIndicator stopAnimating];
     self.autoSolving = NO;
     self.pendingAutoSolveMoves = nil;
