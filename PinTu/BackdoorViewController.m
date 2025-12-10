@@ -7,6 +7,8 @@
 
 #import "BackdoorViewController.h"
 
+NSString * const BackdoorShowTileIndicesPreferenceKey = @"BackdoorShowTileIndicesEnabled";
+
 @interface BackdoorViewController ()
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) UISwitch *toggleSwitch;
@@ -98,6 +100,8 @@
 - (void)tileSwitchChanged:(UISwitch *)sender
 {
     self.showTileIndices = sender.isOn;
+    [[NSUserDefaults standardUserDefaults] setBool:self.showTileIndices
+                                            forKey:BackdoorShowTileIndicesPreferenceKey];
     if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
         [self.delegate backdoorViewController:self didSelectAction:BackdoorActionShowTileIndices];
     }

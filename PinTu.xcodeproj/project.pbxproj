@@ -20,6 +20,7 @@
 		3451FE132EE91EA20022F445 /* 5.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0A2EE91EA20022F445 /* 5.jpg */; };
 		3451FE142EE91EA20022F445 /* 7.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0C2EE91EA20022F445 /* 7.jpg */; };
 		3451FE152EE91EA20022F445 /* 8.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0D2EE91EA20022F445 /* 8.jpg */; };
+		342CEC9E2EEF2CB3009271F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */; };
 		34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AB1B330B1B000A3F3C /* Foundation.framework */; };
 		34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */; };
 		34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
@@ -147,6 +148,7 @@
 		34C33A221B3318C8000A3F3C /* Main_7.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Main_7.jpeg; sourceTree = "<group>"; };
 		34C33A231B3318C8000A3F3C /* Main_8.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Main_8.jpeg; sourceTree = "<group>"; };
 		34C33A2E1B331B6B000A3F3C /* JXBAdPageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JXBAdPageView.h; sourceTree = "<group>"; };
+		342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34C33A2F1B331B6B000A3F3C /* JXBAdPageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JXBAdPageView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -224,6 +226,7 @@
 				34C339BA1B330B1B000A3F3C /* AppDelegate.h */,
 				34C339BB1B330B1B000A3F3C /* AppDelegate.m */,
 				34C339BD1B330B1B000A3F3C /* Main_iPhone.storyboard */,
+				342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */,
 				34C339C01B330B1B000A3F3C /* Main_iPad.storyboard */,
 				34C339C31B330B1B000A3F3C /* ViewController.h */,
 				34C339C41B330B1B000A3F3C /* ViewController.m */,
@@ -414,6 +417,7 @@
 				34C339FD1B330B8D000A3F3C /* 1_12.png in Resources */,
 				34C339C21B330B1B000A3F3C /* Main_iPad.storyboard in Resources */,
 				34C33A2B1B3318C8000A3F3C /* Main_7.jpeg in Resources */,
+				342CEC9E2EEF2CB3009271F7 /* LaunchScreen.storyboard in Resources */,
 				34C339C71B330B1B000A3F3C /* Images.xcassets in Resources */,
 				34C33A2C1B3318C8000A3F3C /* Main_8.jpeg in Resources */,
 				34C33A081B330B8D000A3F3C /* 1_9.png in Resources */,

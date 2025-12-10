@@ -20,6 +20,8 @@ typedef NS_ENUM(NSInteger, BackdoorAction) {
 - (void)backdoorViewController:(BackdoorViewController *)controller didSelectAction:(BackdoorAction)action;
 @end
 
+FOUNDATION_EXPORT NSString * const BackdoorShowTileIndicesPreferenceKey;
+
 @interface BackdoorViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 
 @property (nonatomic, weak) id<BackdoorViewControllerDelegate> delegate;

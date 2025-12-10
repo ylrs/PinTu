@@ -48,6 +48,7 @@
         _puzzleStartDate = nil;
         _hasShownCompletionAlert = NO;
         _currentDifficulty = difficulty;
+        _hasRevealedIndices = [[NSUserDefaults standardUserDefaults] boolForKey:BackdoorShowTileIndicesPreferenceKey];
         self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
     return self;
@@ -394,6 +395,7 @@
     self.hasShownCompletionAlert = NO;
     self.timerLabel.text = @"00:00";
     [self.puzzleView applyShuffleWithDifficulty:difficulty];
+    [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
     [self startPuzzleTimerIfNeeded];
     [self hideAutoSolveLoading];
 }
@@ -402,6 +404,8 @@
 {
     self.hasRevealedIndices = show;
     [self.puzzleView showIndexOverlay:show];
+    [[NSUserDefaults standardUserDefaults] setBool:self.hasRevealedIndices
+                                            forKey:BackdoorShowTileIndicesPreferenceKey];
 }
 
 - (void)startAutoSolveSequence

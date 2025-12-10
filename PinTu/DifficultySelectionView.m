@@ -13,11 +13,16 @@ static const CGFloat kButtonHeight = 64.0f;
 static const CGFloat kButtonHorizontalPadding = 16.0f;
 static const CGFloat kButtonVerticalPadding = 14.0f;
 
+static inline UIColor *DifficultyAccentColor(void)
+{
+    return [UIColor colorWithRed:0.23f green:0.47f blue:0.96f alpha:1.0f];
+}
+
 @interface DifficultySelectionView ()
 
 @property (nonatomic, copy) DifficultySelectionHandler selectionHandler;
 @property (nonatomic, copy) dispatch_block_t cancelHandler;
-@property (nonatomic, assign) PinTuShuffleDifficulty defaultDifficulty;
+@property (nonatomic, assign) PinTuShuffleDifficulty selectedDifficulty;
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) NSArray<UIButton *> *difficultyButtons;
 
@@ -65,7 +70,7 @@ static const CGFloat kButtonVerticalPadding = 14.0f;
 {
     self = [super initWithFrame:CGRectZero];
     if (self) {
-        _defaultDifficulty = defaultDifficulty;
+        _selectedDifficulty = defaultDifficulty;
         _selectionHandler = [selectionHandler copy];
         _cancelHandler = [cancelHandler copy];
         [self buildInterface];
@@ -129,17 +134,17 @@ static const CGFloat kButtonVerticalPadding = 14.0f;
     self.difficultyButtons = createdButtons;
     [self refreshButtonStates];
     
-    UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    cancelButton.translatesAutoresizingMaskIntoConstraints = NO;
-    cancelButton.backgroundColor = [UIColor colorWithWhite:0.94f alpha:1.0f];
-    cancelButton.layer.cornerRadius = kButtonCornerRadius;
-    cancelButton.layer.masksToBounds = YES;
-    cancelButton.titleLabel.font = [UIFont systemFontOfSize:16.0f weight:UIFontWeightSemibold];
-    [cancelButton setTitleColor:[UIColor colorWithWhite:0.20f alpha:1.0f] forState:UIControlStateNormal];
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    [cancelButton addTarget:self action:@selector(cancelButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    UIButton *confirmButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    confirmButton.translatesAutoresizingMaskIntoConstraints = NO;
+    confirmButton.backgroundColor = DifficultyAccentColor();
+    confirmButton.layer.cornerRadius = kButtonCornerRadius;
+    confirmButton.layer.masksToBounds = YES;
+    confirmButton.titleLabel.font = [UIFont systemFontOfSize:17.0f weight:UIFontWeightSemibold];
+    [confirmButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [confirmButton setTitle:@"确定" forState:UIControlStateNormal];
+    [confirmButton addTarget:self action:@selector(confirmButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     
-    UIStackView *rootStack = [[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, subtitleLabel, buttonStack, cancelButton]];
+    UIStackView *rootStack = [[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, subtitleLabel, buttonStack, confirmButton]];
     rootStack.translatesAutoresizingMaskIntoConstraints = NO;
     rootStack.axis = UILayoutConstraintAxisVertical;
     rootStack.spacing = 18.0f;
@@ -160,7 +165,7 @@ static const CGFloat kButtonVerticalPadding = 14.0f;
         [rootStack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor constant:-24.0f],
         
         [subtitleLabel.widthAnchor constraintLessThanOrEqualToAnchor:rootStack.widthAnchor],
-        [cancelButton.heightAnchor constraintEqualToConstant:48.0f]
+        [confirmButton.heightAnchor constraintEqualToConstant:52.0f]
     ]];
     
     for (UIButton *button in self.difficultyButtons) {
@@ -236,17 +241,18 @@ static const CGFloat kButtonVerticalPadding = 14.0f;
 
 - (void)refreshButtonStates
 {
-    UIColor *accent = [UIColor colorWithRed:0.23f green:0.47f blue:0.96f alpha:1.0f];
     for (UIButton *button in self.difficultyButtons) {
-        BOOL isSelected = (button.tag == self.defaultDifficulty);
-        button.backgroundColor = isSelected ? accent : [UIColor colorWithWhite:0.96f alpha:1.0f];
+        BOOL isSelected = (button.tag == self.selectedDifficulty);
+        button.backgroundColor = isSelected ? [UIColor colorWithWhite:1.0f alpha:0.98f] : [UIColor colorWithWhite:0.96f alpha:1.0f];
+        button.layer.borderWidth = isSelected ? 2.0f : 0.0f;
+        button.layer.borderColor = isSelected ? DifficultyAccentColor().CGColor : [UIColor clearColor].CGColor;
         UILabel *titleLabel = [button viewWithTag:1000];
         UILabel *detailLabel = [button viewWithTag:1001];
         if ([titleLabel isKindOfClass:[UILabel class]]) {
-            titleLabel.textColor = isSelected ? [UIColor whiteColor] : [UIColor colorWithWhite:0.15f alpha:1.0f];
+            titleLabel.textColor = isSelected ? DifficultyAccentColor() : [UIColor colorWithWhite:0.15f alpha:1.0f];
         }
         if ([detailLabel isKindOfClass:[UILabel class]]) {
-            detailLabel.textColor = isSelected ? [[UIColor whiteColor] colorWithAlphaComponent:0.85f] : [[UIColor blackColor] colorWithAlphaComponent:0.45f];
+            detailLabel.textColor = isSelected ? [DifficultyAccentColor() colorWithAlphaComponent:0.8f] : [[UIColor blackColor] colorWithAlphaComponent:0.45f];
         }
     }
 }
@@ -272,8 +278,13 @@ static const CGFloat kButtonVerticalPadding = 14.0f;
 - (void)difficultyButtonTapped:(UIButton *)sender
 {
     PinTuShuffleDifficulty chosenDifficulty = (PinTuShuffleDifficulty)sender.tag;
-    self.defaultDifficulty = chosenDifficulty;
+    self.selectedDifficulty = chosenDifficulty;
     [self refreshButtonStates];
+}
+
+- (void)confirmButtonTapped
+{
+    PinTuShuffleDifficulty chosenDifficulty = self.selectedDifficulty;
     __weak typeof(self) weakSelf = self;
     [self dismissWithCompletion:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
