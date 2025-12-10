@@ -13,10 +13,14 @@
 #import "DifficultySelectionView.h"
 #import "PinTu/PinTuView.h"
 #import "HuaRongDaoViewController.h"
+#import <CoreGraphics/CoreGraphics.h>
 
 static NSString * const kUserAddedImageFilenamesKey = @"UserAddedImageFilenames";
 static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
 @interface ViewController ()
+@property (nonatomic, strong) NSArray<NSString *> *defaultAdImageNames;
+@property (nonatomic, strong) NSArray<UIImage *> *predecodedAdImages;
+@property (nonatomic, assign) BOOL adImagesConfigured;
 @end
 
 @implementation ViewController
@@ -28,6 +32,7 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     NSArray *defaultImages = @[@"Main_0.jpeg",@"Main_1.jpeg",@"Main_2.jpeg",@"Main_3.jpeg",@"Main_4.jpeg",@"Main_5.jpeg",@"Main_6.jpeg",@"Main_7.jpeg",@"Main_8.jpeg"];
     mb_puzzleItems = [NSMutableArray arrayWithArray:defaultImages];
     [self loadPersistedUserImages];
+    self.defaultAdImageNames = @[@"1.jpg",@"2.jpg",@"3.jpg",@"4.jpg",@"5.jpg",@"6.jpg",@"7.jpg",@"8.jpg"];
     
     float width = (self.view.bounds.size.width -10 -10 -10 -10)/3.0f - 1;
     
@@ -42,11 +47,8 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     mb_adView = [[JXBAdPageView alloc] initWithFrame:CGRectZero];
     mb_adView.iDisplayTime = 2;
     mb_adView.bWebImage = NO;
-    __weak typeof(self) weakSelf = self;
-    [mb_adView startAdsWithBlock:@[@"1.png",@"2.png",@"3.png",@"4.png",@"5.png",@"6.png",@"7.png",@"8.png"] block:^(NSInteger clickIndex){
-        [weakSelf showPuzzleForIndex:clickIndex];
-    }];
     [self.view addSubview:mb_adView];
+    [self preloadAdImages];
     
     mb_collectionView = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flowLayout];
     [mb_collectionView registerClass:[CollectionViewCell class] forCellWithReuseIdentifier:@"CollectionViewCell"];
@@ -140,6 +142,7 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
 {
     [super viewDidLayoutSubviews];
     [self layoutHomeViews];
+    [self configureAdViewIfNeeded];
 }
 -(void)showPuzzleForIndex:(NSInteger)index
 {
@@ -205,6 +208,113 @@ static NSString * const kUserImagesDirectoryName = @"UserPuzzleImages";
     
     mb_collectionView.frame = CGRectMake(0, collectionY, viewWidth, collectionHeight);
 }
+
+#pragma mark - 广告图片加载
+
+- (void)preloadAdImages
+{
+    NSArray<NSString *> *names = self.defaultAdImageNames;
+    if (names.count == 0) {
+        self.predecodedAdImages = @[];
+        return;
+    }
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        NSMutableArray<UIImage *> *decodedImages = [NSMutableArray arrayWithCapacity:names.count];
+        @autoreleasepool {
+            for (NSString *name in names) {
+                NSString *baseName = [name stringByDeletingPathExtension];
+                NSString *extension = [name pathExtension];
+                NSString *path = [[NSBundle mainBundle] pathForResource:baseName ofType:extension inDirectory:@"MainImage"];
+                if (!path) {
+                    continue;
+                }
+                UIImage *image = [UIImage imageWithContentsOfFile:path];
+                if (!image) {
+                    continue;
+                }
+                UIImage *decoded = [ViewController decodedImageFromImage:image];
+                if (decoded) {
+                    [decodedImages addObject:decoded];
+                }
+            }
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            strongSelf.predecodedAdImages = [decodedImages copy];
+            strongSelf.adImagesConfigured = NO;
+            [strongSelf configureAdViewIfNeeded];
+        });
+    });
+}
+
+- (void)configureAdViewIfNeeded
+{
+    if (self.adImagesConfigured) {
+        return;
+    }
+    if (CGRectGetWidth(mb_adView.bounds) < 1.0f || CGRectGetHeight(mb_adView.bounds) < 1.0f) {
+        return;
+    }
+    if (self.predecodedAdImages == nil) {
+        return;
+    }
+    NSArray<UIImage *> *images = self.predecodedAdImages;
+    if (images.count > 0) {
+        [mb_adView startAdsWithImages:images block:[self adTapCallback]];
+    } else if (self.defaultAdImageNames.count > 0) {
+        [mb_adView startAdsWithBlock:self.defaultAdImageNames block:[self adTapCallback]];
+    }
+    self.adImagesConfigured = YES;
+}
+
+- (JXBAdPageCallback)adTapCallback
+{
+    __weak typeof(self) weakSelf = self;
+    return ^(NSInteger clickIndex) {
+        [weakSelf showPuzzleForIndex:clickIndex];
+    };
+}
+
++ (UIImage *)decodedImageFromImage:(UIImage *)image
+{
+    if (!image) {
+        return nil;
+    }
+    CGImageRef imageRef = image.CGImage;
+    if (!imageRef) {
+        return image;
+    }
+    size_t width = CGImageGetWidth(imageRef);
+    size_t height = CGImageGetHeight(imageRef);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst;
+    CGContextRef context = CGBitmapContextCreate(NULL,
+                                                 width,
+                                                 height,
+                                                 8,
+                                                 0,
+                                                 colorSpace,
+                                                 bitmapInfo);
+    CGColorSpaceRelease(colorSpace);
+    if (!context) {
+        return image;
+    }
+    CGRect rect = CGRectMake(0, 0, (CGFloat)width, (CGFloat)height);
+    CGContextDrawImage(context, rect, imageRef);
+    CGImageRef decompressedImageRef = CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    if (!decompressedImageRef) {
+        return image;
+    }
+    UIImage *decompressedImage = [UIImage imageWithCGImage:decompressedImageRef scale:image.scale orientation:image.imageOrientation];
+    CGImageRelease(decompressedImageRef);
+    return decompressedImage;
+}
+
 -(void)addPhotoTapped
 {
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary]) {

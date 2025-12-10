@@ -36,4 +36,12 @@ typedef void (^JXBAdPageCallback)(NSInteger clickIndex);
  *  @param block      block，回调点击
  */
 - (void)startAdsWithBlock:(NSArray*)imageArray block:(JXBAdPageCallback)block;
+
+/**
+ *  启动函数（直接使用已经解码的图片对象）
+ *
+ *  @param images 图片对象数组
+ *  @param block  点击回调
+ */
+- (void)startAdsWithImages:(NSArray<UIImage *> *)images block:(JXBAdPageCallback)block;
 @end
