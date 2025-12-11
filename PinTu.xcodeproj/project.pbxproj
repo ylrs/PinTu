@@ -12,6 +12,7 @@
 		342CEC872EE7D0CD009271F7 /* DifficultySelectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC862EE7D0CD009271F7 /* DifficultySelectionView.m */; };
 		342CEC8A2EE83429009271F7 /* HuaRongDaoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC892EE83429009271F7 /* HuaRongDaoViewController.m */; };
 		342CEC8D2EEB8149009271F7 /* CelebrationOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */; };
+		342CEC9E2EEF2CB3009271F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */; };
 		3451FE0E2EE91EA20022F445 /* 6.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0B2EE91EA20022F445 /* 6.jpg */; };
 		3451FE0F2EE91EA20022F445 /* 3.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE082EE91EA20022F445 /* 3.jpg */; };
 		3451FE102EE91EA20022F445 /* 1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE062EE91EA20022F445 /* 1.jpg */; };
@@ -20,7 +21,6 @@
 		3451FE132EE91EA20022F445 /* 5.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0A2EE91EA20022F445 /* 5.jpg */; };
 		3451FE142EE91EA20022F445 /* 7.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0C2EE91EA20022F445 /* 7.jpg */; };
 		3451FE152EE91EA20022F445 /* 8.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 3451FE0D2EE91EA20022F445 /* 8.jpg */; };
-		342CEC9E2EEF2CB3009271F7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */; };
 		34C339AC1B330B1B000A3F3C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AB1B330B1B000A3F3C /* Foundation.framework */; };
 		34C339AE1B330B1B000A3F3C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AD1B330B1B000A3F3C /* CoreGraphics.framework */; };
 		34C339B01B330B1B000A3F3C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C339AF1B330B1B000A3F3C /* UIKit.framework */; };
@@ -88,6 +88,7 @@
 		342CEC892EE83429009271F7 /* HuaRongDaoViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HuaRongDaoViewController.m; sourceTree = "<group>"; };
 		342CEC8B2EEB8149009271F7 /* CelebrationOverlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CelebrationOverlayView.h; sourceTree = "<group>"; };
 		342CEC8C2EEB8149009271F7 /* CelebrationOverlayView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CelebrationOverlayView.m; sourceTree = "<group>"; };
+		342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3451FE062EE91EA20022F445 /* 1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 1.jpg; sourceTree = "<group>"; };
 		3451FE072EE91EA20022F445 /* 2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 2.jpg; sourceTree = "<group>"; };
 		3451FE082EE91EA20022F445 /* 3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 3.jpg; sourceTree = "<group>"; };
@@ -148,7 +149,6 @@
 		34C33A221B3318C8000A3F3C /* Main_7.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Main_7.jpeg; sourceTree = "<group>"; };
 		34C33A231B3318C8000A3F3C /* Main_8.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Main_8.jpeg; sourceTree = "<group>"; };
 		34C33A2E1B331B6B000A3F3C /* JXBAdPageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JXBAdPageView.h; sourceTree = "<group>"; };
-		342CEC9D2EEF2CB3009271F7 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		34C33A2F1B331B6B000A3F3C /* JXBAdPageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JXBAdPageView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -624,6 +624,7 @@
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";
 				INFOPLIST_FILE = "PinTu/PinTu-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "拼图";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lianjia.decoration.workflow.home;
@@ -643,6 +644,7 @@
 				GCC_PREFIX_HEADER = "PinTu/PinTu-Prefix.pch";
 				INFOPLIST_FILE = "PinTu/PinTu-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "拼图";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lianjia.decoration.workflow.home;
