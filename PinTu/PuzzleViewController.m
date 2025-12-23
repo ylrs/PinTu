@@ -328,6 +328,7 @@
     controller.delegate = self;
     controller.showTileIndices = self.hasRevealedIndices;
     controller.selectedDifficulty = self.currentDifficulty;
+    controller.gridSize = self.puzzleView ? self.puzzleView.gridSize : 4;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:controller];
     nav.modalPresentationStyle = UIModalPresentationFullScreen;
     nav.modalTransitionStyle = UIModalTransitionStyleCoverVertical;
@@ -367,6 +368,7 @@
     __weak typeof(self) weakSelf = self;
     BOOL shouldShow = controller.showTileIndices;
     PinTuShuffleDifficulty chosenDifficulty = controller.selectedDifficulty;
+    NSInteger chosenGridSize = controller.gridSize;
     [controller dismissViewControllerAnimated:YES completion:^{
         if (!weakSelf) {
             return;
@@ -377,6 +379,8 @@
             [weakSelf startAutoSolveSequence];
         } else if (action == BackdoorActionChangeDifficulty) {
             [weakSelf applyDifficulty:chosenDifficulty];
+        } else if (action == BackdoorActionChangeGridSize) {
+            [weakSelf applyGridSize:chosenGridSize];
         }
     }];
 }
@@ -395,6 +399,27 @@
     self.hasShownCompletionAlert = NO;
     self.timerLabel.text = @"00:00";
     [self.puzzleView applyShuffleWithDifficulty:difficulty];
+    [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
+    [self startPuzzleTimerIfNeeded];
+    [self hideAutoSolveLoading];
+}
+
+- (void)applyGridSize:(NSInteger)gridSize
+{
+    if (!self.puzzleView) {
+        return;
+    }
+    self.autoSolving = NO;
+    self.puzzleView.userInteractionEnabled = YES;
+    [self.puzzleView resetAutoSolveProgress];
+    [self stopPuzzleTimer];
+    self.puzzleStartDate = [NSDate date];
+    self.hasShownCompletionAlert = NO;
+    self.timerLabel.text = @"00:00";
+
+    self.puzzleView.gridSize = gridSize;
+    [self.puzzleView configureWithImage:self.sourceImage];
+    [self.puzzleView applyShuffleWithDifficulty:self.currentDifficulty];
     [self.puzzleView showIndexOverlay:self.hasRevealedIndices];
     [self startPuzzleTimerIfNeeded];
     [self hideAutoSolveLoading];
@@ -421,7 +446,29 @@
     self.puzzleStartDate = [NSDate date];
     [self.puzzleView resetAutoSolveProgress];
     [self showAutoSolveLoading];
-    [self performAutoSolveStepAndSchedule];
+
+    __weak typeof(self) weakSelf = self;
+    [self.puzzleView prepareAutoSolveOrderAsyncWithCompletion:^(BOOL success) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+
+        if (!success) {
+            strongSelf.autoSolving = NO;
+            strongSelf.puzzleView.userInteractionEnabled = YES;
+            [strongSelf hideAutoSolveLoading];
+
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"无法求解"
+                                                                           message:@"当前拼图状态无法自动求解，请手动完成"
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil]];
+            [strongSelf presentViewController:alert animated:YES completion:nil];
+            return;
+        }
+
+        [strongSelf performAutoSolveStepAndSchedule];
+    }];
 }
 
 - (void)performAutoSolveStepAndSchedule

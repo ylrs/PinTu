@@ -12,6 +12,7 @@ typedef NS_ENUM(NSInteger, BackdoorAction) {
     BackdoorActionShowTileIndices = 0,
     BackdoorActionAutoSolve = 1,
     BackdoorActionChangeDifficulty = 2,
+    BackdoorActionChangeGridSize = 3,
 };
 
 @class BackdoorViewController;
@@ -27,5 +28,6 @@ FOUNDATION_EXPORT NSString * const BackdoorShowTileIndicesPreferenceKey;
 @property (nonatomic, weak) id<BackdoorViewControllerDelegate> delegate;
 @property (nonatomic, assign) BOOL showTileIndices;
 @property (nonatomic, assign) PinTuShuffleDifficulty selectedDifficulty;
+@property (nonatomic, assign) NSInteger gridSize;
 
 @end

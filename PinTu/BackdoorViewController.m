@@ -40,7 +40,7 @@ NSString * const BackdoorShowTileIndicesPreferenceKey = @"BackdoorShowTileIndice
     return 1;
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 3;
+    return 4;
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == 0) {
@@ -71,6 +71,19 @@ NSString * const BackdoorShowTileIndicesPreferenceKey = @"BackdoorShowTileIndice
         cell.textLabel.text = @"打乱复杂度";
         cell.detailTextLabel.text = [PinTuView displayNameForDifficulty:self.selectedDifficulty];
         return cell;
+    } else if (indexPath.row == 2) {
+        static NSString *gridSizeIdentifier = @"BackdoorGridSizeCell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:gridSizeIdentifier];
+        if (!cell) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:gridSizeIdentifier];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.font = [UIFont systemFontOfSize:16.0f weight:UIFontWeightMedium];
+            cell.detailTextLabel.font = [UIFont systemFontOfSize:15.0f];
+            cell.detailTextLabel.textColor = [UIColor colorWithRed:0.32f green:0.45f blue:0.86f alpha:1.0f];
+        }
+        cell.textLabel.text = @"网格大小";
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%ldx%ld", (long)self.gridSize, (long)self.gridSize];
+        return cell;
     } else {
         static NSString *buttonIdentifier = @"BackdoorButtonCell";
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:buttonIdentifier];
@@ -91,6 +104,9 @@ NSString * const BackdoorShowTileIndicesPreferenceKey = @"BackdoorShowTileIndice
         UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
         [self presentDifficultyOptionsFromCell:cell];
     } else if (indexPath.row == 2) {
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        [self presentGridSizeOptionsFromCell:cell];
+    } else if (indexPath.row == 3) {
         if ([self.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
             [self.delegate backdoorViewController:self didSelectAction:BackdoorActionAutoSolve];
         }
@@ -138,6 +154,48 @@ NSString * const BackdoorShowTileIndicesPreferenceKey = @"BackdoorShowTileIndice
     UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
     [alert addAction:cancel];
     
+    UIPopoverPresentationController *popover = alert.popoverPresentationController;
+    if (popover) {
+        popover.sourceView = cell ?: self.view;
+        popover.sourceRect = cell ? cell.bounds : self.view.bounds;
+    }
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)presentGridSizeOptionsFromCell:(UITableViewCell *)cell
+{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"选择网格大小"
+                                                                   message:nil
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
+    __weak typeof(self) weakSelf = self;
+    void (^addAction)(NSInteger) = ^(NSInteger size) {
+        NSString *title = [NSString stringWithFormat:@"%ldx%ld", (long)size, (long)size];
+        UIAlertAction *action = [UIAlertAction actionWithTitle:title
+                                                         style:UIAlertActionStyleDefault
+                                                       handler:^(UIAlertAction * _Nonnull _) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            strongSelf.gridSize = size;
+            NSIndexPath *gridSizeIndex = [NSIndexPath indexPathForRow:2 inSection:0];
+            [strongSelf.tableView reloadRowsAtIndexPaths:@[gridSizeIndex] withRowAnimation:UITableViewRowAnimationNone];
+            if ([strongSelf.delegate respondsToSelector:@selector(backdoorViewController:didSelectAction:)]) {
+                [strongSelf.delegate backdoorViewController:strongSelf didSelectAction:BackdoorActionChangeGridSize];
+            }
+        }];
+        [alert addAction:action];
+    };
+    addAction(3);
+    addAction(4);
+    addAction(5);
+    addAction(6);
+    addAction(7);
+    addAction(8);
+
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    [alert addAction:cancel];
+
     UIPopoverPresentationController *popover = alert.popoverPresentationController;
     if (popover) {
         popover.sourceView = cell ?: self.view;
